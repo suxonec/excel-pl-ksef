@@ -3,6 +3,8 @@
 From 2027-01-01, Polish B2B transfers must quote a KSeF number or a collective identifier (IZ). This tool works with those identifiers in bulk, as an Excel workbook backed by a Python helper CLI (`ksefiz`).
 It is a bridge for cash application and AP teams, not the long-term ERP integration. The full brief is in [docs/BRIEF.md](docs/BRIEF.md).
 
+**Hand-over pack:** [user guide](docs/USER_GUIDE.md), [security and compliance note](docs/SECURITY_NOTE.md), [hand-over summary and acceptance evidence](docs/HANDOVER.md).
+
 **Status: steps 1-6 done.** The offline modules work without network access or credentials. All API modules work end to end on KSeF TEST, from the CLI and from Excel buttons:
 
 | Module | Excel | CLI |

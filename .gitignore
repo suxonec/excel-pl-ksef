@@ -1,0 +1,26 @@
+# Python
+.venv
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+
+# Secrets and local config
+.env
+config.local.*
+*.token
+
+# Runtime output
+logs/
+output/
+*.log
+
+# Excel working copies (may contain real data). The macro-enabled tool is built
+# locally from excel/KSeF_IZ_Tool_template.xlsx + excel/vba/*.bas
+*.xlsm
+~$*
+.DS_Store

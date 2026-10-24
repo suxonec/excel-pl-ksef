@@ -59,3 +59,12 @@ Checked against https://github.com/CIRFMF/ksef-api `open-api.json` (API 2.9.0, b
 - The API itself returns 71004 for mixed sellers and 71005 for duplicate KSeF numbers.
 - Decode as either party shows payment and description (`detailsHidden=false`).
 - Lookup returns IZ from all contexts that include the invoice (`createdInCurrentContext` tells them apart), newest first.
+
+## Batch session (verified live on TEST 2026-10-24)
+
+- `POST /sessions/batch` takes `{formCode, batchFile: {fileSize, fileHash, fileParts: [{ordinalNumber, fileSize, fileHash}]}, encryption}`. Hashes and sizes: the ZIP before encryption, each part after encryption (AES-256-CBC, same key/IV scheme as the online session).
+- The response's `partUploadRequests[]` gives `method` (PUT), a pre-signed `url` (on TEST: `api-test.ksef.mf.gov.pl`) and `headers`. Send the raw part bytes **without** the access token. Expect 201.
+- `POST /sessions/batch/{ref}/close`, then poll `GET /sessions/{ref}` until code 200 (with `successfulInvoiceCount` / `failedInvoiceCount`).
+- `GET /sessions/{ref}/invoices` (pageSize up to 1000, `x-continuation-token`) returns `ksefNumber` and `invoiceHash` per invoice. Correlate with the local SHA-256 of each XML.
+- 500 FA(3) invoices: one 0.47 MB ZIP, 500 accepted, 0 failed, in under a minute. Online sending is limited to 180 invoices/hour.
+- One IZ over 500 invoices: generate in one request. Decode returns all 500 rows in one page (pageSize 500).

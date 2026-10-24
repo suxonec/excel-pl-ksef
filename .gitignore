@@ -24,3 +24,7 @@ output/
 *.xlsm
 ~$*
 .DS_Store
+
+# Personal workbook builds (build_workbook.py --local) and any *_local copies
+*_local.xlsx
+*_local.xlsm

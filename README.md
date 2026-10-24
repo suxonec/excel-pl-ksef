@@ -63,7 +63,10 @@ On macOS, keep the venv outside a synced `Documents` folder. macOS can mark the 
 
 ## Excel workbook
 
-1. Build the template: `.venv/bin/python scripts/build_workbook.py`, which writes `excel/KSeF_IZ_Tool_template.xlsx`. Add `--demo` to get `output/KSeF_IZ_Tool_demo.xlsx`. It's prefilled with synthetic statements and open items, the KSeF TEST invoices (if `~/.ksefiz/test/invoices.csv` exists), and `helper_path`.
+1. Build a workbook with `.venv/bin/python scripts/build_workbook.py`, choosing one of three flavours:
+   - no flag: `excel/KSeF_IZ_Tool_template.xlsx`, empty sheets (committed);
+   - `--demo`: `excel/KSeF_IZ_Tool_demo.xlsx`, prefilled with synthetic statements, decoded rows and open items, with nothing machine-specific (committed);
+   - `--local`: `output/KSeF_IZ_Tool_local.xlsx`, the demo plus this machine's `helper_path` and the KSeF TEST invoices from `~/.ksefiz/test/invoices.csv`. It's for your own testing and is **never committed** (`output/` is git-ignored).
 2. Open it in Excel. Open the VBA editor (Alt+F11, or Tools > Macro > Visual Basic Editor on Mac). Use File > Import File for every `excel/vba/*.bas` (`modIZ`, `modDetect`, `modMatch`, `modSelfTest`, `modSetup`, `modHelper`, `modApi`).
 3. Run the macro `SetupWorkbook`. It adds the buttons.
 4. Save as **Excel Macro-Enabled Workbook** (`excel/KSeF_IZ_Tool.xlsm`). The `.xlsm` is git-ignored.
@@ -75,7 +78,7 @@ On Windows, `scripts/build_xlsm.ps1` does steps 2-4 automatically. It needs "Tru
 
 The buttons start `ksefiz` in the background. They show progress in the status bar, Esc cancels after the current request, and results are written back as values. Each run adds a row to the `Log` sheet (request count, input hash, error code, trace id), and `Config > budget_left` shows the remaining `collectiveIdentifier` budget.
 
-- **Config:** set `helper_path` to the full path of the executable. That's `<repo>/.venv/bin/ksefiz` on Mac or `<repo>\.venv\Scripts\ksefiz.exe` on Windows (`--demo` fills it in). `environment` defaults to TEST, and PROD asks for confirmation on every run. `profile` picks a stored context (blank = default). `log_folder` is an absolute folder, or blank for `~/.ksefiz/logs`.
+- **Config:** set `helper_path` to the full path of the executable. That's `<repo>/.venv/bin/ksefiz` on Mac or `<repo>\.venv\Scripts\ksefiz.exe` on Windows (`--local` fills it in). `environment` defaults to TEST, and PROD asks for confirmation on every run. `profile` picks a stored context (blank = default). `log_folder` is an absolute folder, or blank for `~/.ksefiz/logs`.
 - **Mac, once:** run `scripts/install_mac_helper.sh`. Excel's sandbox only lets VBA start programs through an AppleScript in `~/Library/Application Scripts/com.microsoft.Excel/`. The installed `ksefiz.scpt` will only start an executable named `ksefiz`, for a job folder inside Excel's container, with every argument quoted.
 - **Sheets:**
   - `2_Decode`: IZ in A (**Take IZ from 1_Detect**, then **Decode**). Results go to C:K, which `3_Match` reads.

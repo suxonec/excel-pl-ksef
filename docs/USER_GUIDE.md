@@ -18,13 +18,13 @@ This is a bridge until the ERP does this natively. It replaces manual lookups in
 ## What an IZ looks like
 
 ```
-6261819874-IZ202610-3C91E2090000-15
-└ seller NIP ┘ └ year+month ┘ └ technical part ┘ └ check digits
+1111111111-IZ202607-65ED02180000-E7      (example from the MF API documentation)
+└seller NIP┘  └yyyymm┘ └technical part┘ └check digits
 ```
 
 - 35 characters. The first 10 digits are always the **seller's** NIP, even when the buyer created the IZ (confirmed on KSeF TEST).
 - The last 2 characters are a checksum, so the tool can tell a typing or bank mangling error from a real IZ **without** contacting KSeF.
-- A KSeF invoice number has the same shape and checksum, with a date instead of `IZYYYYMM`: `6261819874-20261024-0887F0400000-BA`.
+- A KSeF invoice number has the same shape and checksum, with a date instead of `IZYYYYMM`: `5265877635-20250826-0100001AF629-AF` (MF documentation example).
 
 ## Sheets at a glance
 
@@ -122,6 +122,6 @@ Every button run adds a line to the `Log` sheet: time, user, environment, operat
 
 1. Install the helper: Python 3.11+, then `pip install` from the repository (see `README.md`). On Mac, also run `scripts/install_mac_helper.sh`.
 2. Create the KSeF token. On TEST: `ksefiz testenv-setup`. For DEMO/PROD, a token with **only** the `CollectiveIdentifierManage` permission is generated in KSeF by an authorised person. It's stored in the computer's credential store, never in the workbook.
-3. Build the workbook: `scripts/build_workbook.py`, import `excel/vba/*.bas`, run `SetupWorkbook` and save as `.xlsm`. On Windows, `scripts/build_xlsm.ps1` does this automatically.
+3. Build the workbook: `scripts/build_workbook.py` (empty) or `--demo` (synthetic example data), import `excel/vba/*.bas`, run `SetupWorkbook` and save as `.xlsm`. On Windows, `scripts/build_xlsm.ps1` does this automatically. Keep working copies that contain real data out of shared folders and out of git.
 4. In `Config`, set `helper_path`, `environment` (TEST until sign-off), and `profile` if more than one company context is used.
 5. Click **Run self-test**. It must show `42/42 passed`.

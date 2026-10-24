@@ -1,7 +1,7 @@
 """Compare what the VBA macros wrote into a saved workbook with the Python result
 for the same sheet contents (parity check, any data).
 
-    python scripts/check_workbook.py output/KSeF_IZ_Tool_demo.xlsm
+    python scripts/check_workbook.py output/KSeF_IZ_Tool_local.xlsm
 
 Run RunDetect, RunMatch and RunSelfTest in Excel first, then save.
 """

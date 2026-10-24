@@ -1,9 +1,12 @@
-"""Build the Excel template (no data) or a demo copy prefilled with synthetic data.
+"""Build the Excel workbook in one of three flavours.
 
-    python scripts/build_workbook.py                -> excel/KSeF_IZ_Tool_template.xlsx
-    python scripts/build_workbook.py --demo         -> output/KSeF_IZ_Tool_demo.xlsx
-        (synthetic statements / open items; plus, if ~/.ksefiz/test/invoices.csv exists, the
-        TEST invoices in 4_Generate and 5_Lookup, and helper_path set to this repo's ksefiz)
+    python scripts/build_workbook.py           -> excel/KSeF_IZ_Tool_template.xlsx   (committed)
+        empty sheets + self-test vectors
+    python scripts/build_workbook.py --demo    -> excel/KSeF_IZ_Tool_demo.xlsx       (committed)
+        + synthetic statements, decoded rows and open items; nothing machine-specific
+    python scripts/build_workbook.py --local   -> output/KSeF_IZ_Tool_local.xlsx     (git-ignored)
+        + this machine's helper_path and the KSeF TEST invoices from
+        ~/.ksefiz/test/invoices.csv in 4_Generate / 5_Lookup - for your own testing only
 
 Then import excel/vba/*.bas in Excel, run SetupWorkbook and save as .xlsm (see README).
 Sheet layouts must match the column constants in excel/vba/*.bas.
@@ -13,7 +16,8 @@ from __future__ import annotations
 
 import argparse
 import csv
-from datetime import date
+import os
+from datetime import date, datetime
 from pathlib import Path
 
 from openpyxl import Workbook
@@ -73,8 +77,12 @@ def _read_csv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(f))
 
 
-def build(demo: bool) -> Workbook:
+def build(demo: bool, local: bool = False) -> Workbook:
     wb = Workbook()
+    # Fixed metadata: no user name or build time in committed files, reproducible builds
+    wb.properties.creator = "ksefiz"
+    wb.properties.lastModifiedBy = "ksefiz"
+    wb.properties.created = wb.properties.modified = datetime(2026, 1, 1)
     readme = wb.active
     assert readme is not None
     readme.title = "README"
@@ -207,25 +215,27 @@ def build(demo: bool) -> Workbook:
             cell.alignment = Alignment(wrap_text=True)
     vec.sheet_state = "hidden"
 
-    if demo:
+    if demo or local:
         ds = synthetic.generate()
         _rows(det, 1, synthetic.STATEMENT_FIELDS, ds.statements)
         _rows(dec, 3, synthetic.DECODED_FIELDS, ds.decoded)
         _rows(mat, 1, synthetic.OPEN_ITEM_FIELDS, ds.open_items)
-        helper = ROOT / ".venv" / "bin" / "ksefiz"
+    if local:  # machine-specific: never commit (output/ is git-ignored)
+        helper = ROOT / ".venv" / ("Scripts/ksefiz.exe" if os.name == "nt" else "bin/ksefiz")
         if helper.exists():
             cfg["B5"] = str(helper)
-        _demo_test_invoices(gen, lk, q)
+        _local_test_invoices(gen, lk, q)
     return wb
 
 
-def _demo_test_invoices(gen: Worksheet, lk: Worksheet, q: Worksheet) -> None:
-    """KSeF TEST invoices from scripts/send_test_invoices.py, if present (TEST data only)."""
+def _local_test_invoices(gen: Worksheet, lk: Worksheet, q: Worksheet) -> None:
+    """KSeF TEST invoices from scripts/send_test_invoices.py, if present (TEST data only).
+    Uses the small online-sent set, not the 500-invoice batch."""
     path = Path.home() / ".ksefiz" / "test" / "invoices.csv"
     if not path.exists():
         return
     with path.open(encoding="utf-8-sig", newline="") as f:
-        inv = list(csv.DictReader(f))
+        inv = [r for r in csv.DictReader(f) if not (r.get("set") or "").startswith("batch")]
     sellers = list(dict.fromkeys(r["seller_nip"] for r in inv))
     own = [r for r in inv if r["seller_nip"] == sellers[0]]
     rows = [{"seller_nip": r["seller_nip"], "ksef_number": r["ksef_number"], "amount": r["gross"],
@@ -243,14 +253,21 @@ def _demo_test_invoices(gen: Worksheet, lk: Worksheet, q: Worksheet) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--demo", action="store_true", help="prefill synthetic data")
+    mode = ap.add_mutually_exclusive_group()
+    mode.add_argument("--demo", action="store_true", help="generic demo with synthetic data")
+    mode.add_argument("--local", action="store_true",
+                      help="personal test copy (helper path, TEST invoices) in output/")
     ap.add_argument("--out", type=Path)
     args = ap.parse_args()
-    default = (ROOT / "output" / "KSeF_IZ_Tool_demo.xlsx" if args.demo
-               else ROOT / "excel" / "KSeF_IZ_Tool_template.xlsx")
+    if args.local:
+        default = ROOT / "output" / "KSeF_IZ_Tool_local.xlsx"
+    elif args.demo:
+        default = ROOT / "excel" / "KSeF_IZ_Tool_demo.xlsx"
+    else:
+        default = ROOT / "excel" / "KSeF_IZ_Tool_template.xlsx"
     out: Path = args.out or default
     out.parent.mkdir(parents=True, exist_ok=True)
-    build(args.demo).save(out)
+    build(args.demo, args.local).save(out)
     print(f"wrote {out}")
 
 

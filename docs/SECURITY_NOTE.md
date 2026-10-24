@@ -27,7 +27,7 @@ For the security review and the tax/compliance review before any use beyond KSeF
 | `ksefiz` CLI / `excel-run` | user's machine, user's privileges | KSeF hosts only |
 | Mac launcher `ksefiz.scpt` | macOS, started by Excel via `AppleScriptTask` | none itself |
 
-Hosts (hard-coded in `src/ksefiz/config.py`):
+Hosts (hard-coded in `src/ksefiz/config.py`). The TEST-only invoice helper also uploads batch parts to the pre-signed URL KSeF returns, and refuses any host outside `*.mf.gov.pl`:
 - `https://api-test.ksef.mf.gov.pl/v2`
 - `https://api-demo.ksef.mf.gov.pl/v2`
 - `https://api.ksef.mf.gov.pl/v2`
@@ -130,14 +130,14 @@ Current state: **minimum versions only, no lockfile, no hash pinning.** The tool
 |---|---|---|---|
 | 1 | Validation on **DEMO** with a real certificate / token (delivery step 7) | IT + tax | not started; needs credentials |
 | 2 | **Windows Excel 365** run of the buttons (VBA Windows branch and `build_xlsm.ps1` are untested; Python is CI-tested on Windows) | IT | open |
-| 3 | Generate an IZ with **500 invoices** on TEST (acceptance criterion; needs 500 test invoices) | dev | open |
+| 3 | Generate an IZ with **500 invoices** on TEST (acceptance criterion) | dev | **done** 2026-10-24 (see HANDOVER.md) |
 | 4 | Policy: macro-enabled workbook allowed? AppleScript launcher (Mac) / `WScript.Shell` + ASR rules (Windows)? Code-sign the VBA project? | security | open (Q5) |
 | 5 | Production auth route: KSeF token vs XAdES certificate (Q4); who generates and rotates tokens; revocation procedure (`DELETE /tokens/{ref}`; no CLI command yet) | security | open |
 | 6 | Dependency pinning (lockfile with hashes) and packaging (signed single executable) | dev + security | open |
 | 7 | Retention and access rules for the audit log, the workbook copies and the `Log` sheet (GDPR for sole-trader data) | compliance | open |
 | 8 | Behaviour and procedure when KSeF is unavailable (fallback to individual KSeF numbers) | finance ops | documented in the user guide; confirm (Q7) |
 | 9 | System of record for generated IZ (Q6) | finance + tax | open |
-| 10 | Publicly visible repository: content is synthetic / TEST only. Confirm that public visibility is intended. | owner | open |
+| 10 | Publicly visible repository: content is synthetic / TEST only. Committed files were scanned for user names, local paths, test-context NIPs, KSeF numbers and checksum-valid NIPs (none apart from the MF documentation examples). Machine-specific workbooks are built with `--local` into git-ignored `output/`. Commit author metadata (name, e-mail) is part of the git history. Confirm that public visibility is intended. | owner | open |
 
 References:
 - `docs/decisions.md` (ADR-001 … ADR-011 and the open questions)

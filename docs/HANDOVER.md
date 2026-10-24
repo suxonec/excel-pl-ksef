@@ -17,7 +17,7 @@ Proof-of-concept status as of 2026-10-24. Everything below was verified on the K
 | 1 | Repo, CI, IZ/KSeF parsing and CRC-8 | done |
 | 2 | Offline Excel modules M1, M2, M4 with VBA | done; Excel for Mac verified (self-test 42/42, row-level parity with Python) |
 | 3 | TEST setup, token with `CollectiveIdentifierManage` | done (`ksefiz testenv-setup`, `auth-test`) |
-| 4 | TEST invoices (FA(3)) so real KSeF numbers exist | done (helper script, 6 invoices, 2 test companies) |
+| 4 | TEST invoices (FA(3)) so real KSeF numbers exist | done (helper script: 6 invoices via online session, 500 via one batch session; 2 test companies) |
 | 5 | M5 generate, M3 decode, M6 lookup, M7 query, paging, rate limiting, audit | done, end to end on TEST |
 | 6 | Excel buttons wired to the helper, progress, cancel, errors | done; tested by the user on Excel for Mac |
 | 7 | DEMO validation | **not started**: needs a real certificate/token and approval |
@@ -28,7 +28,7 @@ Proof-of-concept status as of 2026-10-24. Everything below was verified on the K
 | Criterion | Result | Evidence |
 |---|---|---|
 | Detect + validate IZ in a 1,000-line statement in < 5 s, zero false positives on random 35-char strings | **met**: 0.08 s; 0 valid hits on 10,000 random strings and 5,000 wrong-checksum IDs | `tests/test_iz.py` |
-| Generate an IZ on TEST for 2 and for 500 invoices | **partly**: 2, 5 and 50 × 2 generated; **500 not yet** (needs 500 TEST invoices) | `tests/test_e2e_test_env.py`, run logs |
+| Generate an IZ on TEST for 2 and for 500 invoices | **met**: 2, 5, 50 × 2 and **one IZ over 500 invoices** (3.5 s, one request). A 501-invoice group was rejected before the API. The 500-row decode returned exactly the sent KSeF numbers and amounts in 2 s. | `tests/test_e2e_test_env.py` (`KSEFIZ_E2E_500=1`), run logs |
 | Reject mixed sellers and duplicates **before** calling the API | **met**, and the API itself was confirmed to return 71004 / 71005 for these cases | `tests/test_operations_mock.py`, e2e |
 | Decode 50 IZ on TEST within rate limits, paging handled, every row logged | **met**: 50 IZ / 100 rows with forced paging in ~10 s. Every API call is in the audit log; the result rows go to the output sheet/CSV. | `KSEFIZ_E2E_HEAVY=1 pytest -m e2e` |
 | Reverse lookup returns all IZ containing an invoice used in several IZ | **met**: 3 IZ for one invoice, including a buyer-created IZ | e2e, run logs |
@@ -51,7 +51,6 @@ Also learned:
 See SECURITY_NOTE.md section 9 for owners. In short:
 - DEMO validation
 - an Excel 365 run on Windows
-- the 500-invoice IZ
 - macro and launcher policy, and code signing
 - production auth route and token rotation
 - dependency pinning and packaging
@@ -65,7 +64,7 @@ See SECURITY_NOTE.md section 9 for owners. In short:
 .venv/bin/pytest -q                       # 91 unit tests
 .venv/bin/pytest -m e2e                   # live TEST checks (needs ksefiz testenv-setup)
 .venv/bin/ksefiz --help                   # detect, validate, match, decode, generate, lookup, query
-.venv/bin/python scripts/build_workbook.py [--demo]
+.venv/bin/python scripts/build_workbook.py [--demo | --local]
 ```
 
 Full setup is in `README.md`. TEST state lives outside the repo:

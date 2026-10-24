@@ -4,6 +4,8 @@ buyer profiles) and `scripts/send_test_invoices.py` first.
     .venv/bin/pytest -m e2e
     KSEFIZ_E2E_HEAVY=1 .venv/bin/pytest -m e2e   # + generate/decode 50 IZ (uses 20 of the
                                                 # 132 IZ slots per test invoice each run)
+    KSEFIZ_E2E_500=1 .venv/bin/pytest -m e2e     # + one IZ over 500 invoices (needs
+                                                # send_test_invoices.py --batch --count 500)
 """
 
 import csv
@@ -103,3 +105,24 @@ def test_generate_50_and_decode_with_paging(seller_api: ops.Api, invoices: list[
     assert Counter(r["iz"] for r in decoded) == dict.fromkeys(izs, 2)
     assert all(r["details_hidden"] == "false" and r["amount"] for r in decoded)
     assert seller_api.limiter.remaining().per_hour >= 0
+
+
+@pytest.mark.skipif(not os.environ.get("KSEFIZ_E2E_500"), reason="set KSEFIZ_E2E_500=1")
+def test_generate_and_decode_500_invoice_iz(seller_api: ops.Api,
+                                            invoices: list[dict[str, str]]) -> None:
+    big = [r for r in invoices if r.get("set") == "batch500"]
+    if len(big) < 500:
+        pytest.skip("run scripts/send_test_invoices.py --batch --count 500")
+    rows = [{"ksef_number": r["ksef_number"], "amount": r["gross"], "currency": "PLN",
+             "group_key": "BIG"} for r in big[:500]]
+    over = rows + [{**rows[0], "ksef_number": next(
+        r["ksef_number"] for r in invoices if r.get("set") != "batch500"
+        and r["seller_nip"] == seller_api._nip)}]
+    (rejected,) = ops.prevalidate(over, seller_api.max_invoices)
+    assert not rejected.ok and "limit is 500" in " ".join(rejected.errors)
+
+    (gen,) = ops.generate(seller_api, ops.prevalidate(rows, seller_api.max_invoices))
+    assert gen["status"] == ops.OK and gen["invoice_count"] == "500"
+    decoded = ops.decode(seller_api, [gen["iz"]])
+    assert len(decoded) == 500 and all(r["status"] == ops.OK for r in decoded)
+    assert {r["ksef_number"] for r in decoded} == {r["ksef_number"] for r in rows}

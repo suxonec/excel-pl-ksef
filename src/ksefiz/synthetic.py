@@ -113,13 +113,13 @@ def generate(seed: int = 20261024, lines: int = 1000, invoices: int = 200) -> Da
         ksefs.append(ksef)
         amounts[ksef] = amt
         ds.open_items.append({
-            "doc_no": f"9{510000000 + i}", "customer": f"CUST-{rng.randint(1, 60):03d}",
+            "doc_no": f"FI{510000000 + i}", "customer": f"CUST-{rng.randint(1, 60):03d}",
             "ksef_number": ksef, "amount": f"{amt:.2f}",
             "currency": "EUR" if i % 17 == 0 else "PLN",
             "due_date": f"2026-{rng.randint(1, 12):02d}-{rng.randint(1, 28):02d}",
         })
     # One invoice booked twice in the ERP extract
-    ds.open_items.append(dict(ds.open_items[5], doc_no="9519999999"))
+    ds.open_items.append(dict(ds.open_items[5], doc_no="FI519999999"))
 
     # Decoded IZ rows: customers paying 2-6 of our invoices per IZ.
     # Every row carries the match status it must get, set by construction.

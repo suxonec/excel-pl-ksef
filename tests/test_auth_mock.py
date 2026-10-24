@@ -16,7 +16,7 @@ from ksefiz.client import ApiError, KsefClient
 from ksefiz.config import BASE_URLS, Env
 
 BASE = BASE_URLS[Env.TEST]
-NIP = "6261819874"
+NIP = "2588139986"  # synthetic, fails the NIP checksum
 
 
 def _oaep() -> padding.OAEP:

@@ -10,8 +10,8 @@ jobs:
   installer:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - name: Install build tools
@@ -56,8 +56,9 @@ jobs:
           if (Test-Path $exe) { throw "helper not removed on uninstall" }
           if (-not (Test-Path $wb)) { throw "uninstall must keep the user's workbook" }
           Write-Host "smoke test passed"
-      - uses: actions/upload-artifact@v4
+      # archive: false uploads the installer itself (no zip); the artifact is named after the file
+      - uses: actions/upload-artifact@v7
         with:
-          name: KSeF-IZ-Tool-Setup
           path: dist/KSeF-IZ-Tool-Setup-*.exe
+          archive: false
           if-no-files-found: error

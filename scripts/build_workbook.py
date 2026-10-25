@@ -94,9 +94,10 @@ def build(demo: bool, local: bool = False) -> Workbook:
                                  fill=PatternFill("solid", bgColor=color),
                                  font=Font(color="FFFFFF", bold=True)))
     lines = [
-        (3, f"Version {__version__}. Offline modules: M1 Detect, M2 Validate (worksheet "
-            "functions), M4 Match. API modules (Decode, Generate, Lookup, Query) come in step 6."
-         ),
+        (2, "New here? Click 'Load sample data' (right of the buttons below) to fill the "
+            "sheets with synthetic examples, then try Detect IDs, Check (no API) and Match."),
+        (3, f"Version {__version__}. Offline: M1 Detect, M2 Validate (worksheet functions), "
+            "M4 Match. With KSeF: M3 Decode, M5 Generate, M6 Lookup, M7 Query."),
         (4, "No secrets live in this workbook. The KSeF token stays in the OS keyring / helper."),
         (6, "Buttons (created by macro SetupWorkbook after importing excel/vba/*.bas). API "
             "buttons need Config > helper_path; Mac: run scripts/install_mac_helper.sh once."),
@@ -216,6 +217,8 @@ def build(demo: bool, local: bool = False) -> Workbook:
             cell.alignment = Alignment(wrap_text=True)
     vec.sheet_state = "hidden"
 
+    _sample_sheet(wb)
+
     if demo or local:
         ds = synthetic.generate()
         _rows(det, 1, synthetic.STATEMENT_FIELDS, ds.statements)
@@ -227,6 +230,30 @@ def build(demo: bool, local: bool = False) -> Workbook:
             cfg["B5"] = str(helper)
         _local_test_invoices(gen, lk, q)
     return wb
+
+
+# Hidden _Sample sheet: synthetic data that the "Load sample data" button (modSample.bas)
+# copies into the input sheets. Column blocks and counts must match modSample.bas.
+SAMPLE_BLOCKS = (  # (first column, fields, count cell)
+    (1, synthetic.STATEMENT_FIELDS, "AC1"),    # A:F   -> 1_Detect A:F
+    (8, synthetic.DECODED_FIELDS, "AC2"),      # H:M   -> 2_Decode C:H
+    (15, synthetic.OPEN_ITEM_FIELDS, "AC3"),   # O:T   -> 3_Match A:F
+    (22, GENERATE_IN, "AC4"),                  # V:AA  -> 4_Generate A:F
+)
+
+
+def _sample_sheet(wb: Workbook) -> None:
+    ws = wb.create_sheet("_Sample")
+    ds = synthetic.generate()
+    data = (ds.statements, ds.decoded, ds.open_items, synthetic.sample_generate_rows(ds))
+    for (col, fields, count_cell), rows in zip(SAMPLE_BLOCKS, data, strict=True):
+        _headers(ws, col, list(fields))
+        _rows(ws, col, list(fields), rows)
+        ws[count_cell] = len(rows)
+        for i in range(len(fields)):
+            ws.column_dimensions[ws.cell(row=1, column=col + i).column_letter].number_format = "@"
+    ws["AD1"] = "Synthetic sample data (seeded generator, NIPs fail the checksum on purpose)."
+    ws.sheet_state = "hidden"
 
 
 def _local_test_invoices(gen: Worksheet, lk: Worksheet, q: Worksheet) -> None:

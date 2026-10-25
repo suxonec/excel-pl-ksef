@@ -26,6 +26,19 @@ This is a bridge until the ERP does this natively. It replaces manual lookups in
 - The last 2 characters are a checksum, so the tool can tell a typing or bank mangling error from a real IZ **without** contacting KSeF.
 - A KSeF invoice number has the same shape and checksum, with a date instead of `IZYYYYMM`: `5265877635-20250826-0100001AF629-AF` (MF documentation example).
 
+## Try it with sample data
+
+On the `README` sheet, click **Load sample data**. It fills the sheets with synthetic examples. No real companies are involved, and the NIPs fail the checksum on purpose:
+
+| Sheet | Sample | Try |
+|---|---|---|
+| `1_Detect` | 1,000 bank statement lines with IZ and KSeF numbers in mangled forms | **Detect IDs** finds the IDs. Lines without a valid ID turn red. |
+| `2_Decode` | decoded invoice rows, as KSeF would return them | used as input for `3_Match` |
+| `3_Match` | ERP open items | **Match open items** shows every match status |
+| `4_Generate` | 10 invoices in 5 groups | **Check (no API)** shows one group of each outcome: ready, mixed sellers, duplicate, single invoice |
+
+It replaces the current contents of those four sheets, after asking. The **KSeF buttons** (Decode, Generate IZ, Look up) need invoices that really exist in KSeF; the sample numbers don't.
+
 ## Sheets at a glance
 
 | Sheet | You paste / enter | You click | The tool writes |

@@ -70,6 +70,7 @@ Private Sub AddAllButtons()
     AddButton "README", "B10", "Detect IDs (1_Detect)", "RunDetect"
     AddButton "README", "B12", "Match open items (3_Match)", "RunMatch"
     AddButton "README", "B14", "Decode IZ (2_Decode)", "RunDecode"
+    AddButton "README", "E8", "Load sample data", "LoadSampleData"
     AddButton "1_Detect", "P2", "Detect IDs", "RunDetect"
     AddButton "2_Decode", "M2", "Take IZ from 1_Detect", "TakeIzFromDetect"
     AddButton "2_Decode", "M4", "Decode (KSeF)", "RunDecode"

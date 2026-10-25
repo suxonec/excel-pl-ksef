@@ -40,6 +40,8 @@ How it's built:
 - Before committing it, run `scripts/sanitize_xlsm.py` on it. Excel stores the user name and the save folder in every saved file.
 - CI checks with `scripts/verify_xlsm_vba.py` that the workbook contains exactly the code in `excel/vba/` and no user or machine details.
 
+The workbook has a **Load sample data** button (README sheet). It copies synthetic examples from a hidden `_Sample` sheet into the input sheets, so Detect, Check (no API) and Match can be tried right away.
+
 Support commands: `ksefiz doctor` (what this PC is set up with, no secrets), `ksefiz token-set --env <env> --nip <NIP>` (store a token, hidden input), `ksefiz setup` (the assistant).
 
 ## KSeF TEST environment

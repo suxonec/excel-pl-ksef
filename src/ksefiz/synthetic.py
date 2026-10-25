@@ -190,6 +190,43 @@ def generate(seed: int = 20261024, lines: int = 1000, invoices: int = 200) -> Da
     return ds
 
 
+SAMPLE_GENERATE_EXPECTED = {
+    # group_key -> expected `generate --dry-run` / "Check (no API)" outcome
+    "SAMPLE-PAID": "ready",
+    "SAMPLE-NOPAY": "ready",
+    "SAMPLE-MIXED": "71004",
+    "SAMPLE-DUPLICATE": "71005",
+    "SAMPLE-SINGLE": "at least 2",
+}
+
+
+def sample_generate_rows(ds: Dataset, seed: int = 7) -> list[Row]:
+    """Invoice list for 4_Generate that shows every pre-check outcome (offline demo).
+
+    Synthetic KSeF numbers: "Check (no API)" works, "Generate IZ" against KSeF does not,
+    because these invoices do not exist there."""
+    rng = random.Random(seed)
+    own = [o for o in ds.open_items if o["currency"] == "PLN"]
+    seller = own[0]["ksef_number"][:10]
+    other_nip = fake_nip(rng)
+    other = make_ksef(other_nip, "20261015", _hex(rng, 12))
+
+    def row(o: Row, group: str, pay: bool = True, desc: str = "") -> Row:
+        return {"seller_nip": o["ksef_number"][:10], "ksef_number": o["ksef_number"],
+                "amount": o["amount"] if pay else "", "currency": "PLN" if pay else "",
+                "description": desc, "group_key": group}
+
+    rows = [row(o, "SAMPLE-PAID", desc=f"Payment for {o['doc_no']}") for o in own[0:3]]
+    rows += [row(o, "SAMPLE-NOPAY", pay=False) for o in own[3:5]]
+    rows += [row(own[5], "SAMPLE-MIXED"),
+             {"seller_nip": other_nip, "ksef_number": other, "amount": "", "currency": "",
+              "description": "", "group_key": "SAMPLE-MIXED"}]
+    rows += [row(own[6], "SAMPLE-DUPLICATE"), row(own[6], "SAMPLE-DUPLICATE")]
+    rows += [row(own[7], "SAMPLE-SINGLE")]
+    assert all(r["seller_nip"] == seller for r in rows if r["group_key"] != "SAMPLE-MIXED")
+    return rows
+
+
 def write(ds: Dataset, out_dir: Path) -> None:
     write_rows(out_dir / "statements_sample.csv", STATEMENT_FIELDS, ds.statements)
     write_rows(out_dir / "open_items_sample.csv", OPEN_ITEM_FIELDS, ds.open_items)

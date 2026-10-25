@@ -94,3 +94,17 @@ def test_cli_end_to_end(tmp_path: Path) -> None:
     r = runner.invoke(app, ["validate", "--in", str(ids), "--out", str(res)])
     assert r.exit_code == 0, r.output
     assert [x["valid"] for x in read_rows(res)] == ["Y", "N"]
+
+
+def test_sample_generate_rows_show_every_check_outcome() -> None:
+    from ksefiz.operations import prevalidate
+
+    rows = synthetic.sample_generate_rows(synthetic.generate())
+    groups = {g.key: g for g in prevalidate(rows)}
+    assert set(groups) == set(synthetic.SAMPLE_GENERATE_EXPECTED)
+    for key, expected in synthetic.SAMPLE_GENERATE_EXPECTED.items():
+        g = groups[key]
+        if expected == "ready":
+            assert g.ok, (key, g.errors)
+        else:
+            assert not g.ok and expected in " ".join(g.errors), (key, g.errors)

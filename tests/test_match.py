@@ -74,6 +74,8 @@ def test_cli_end_to_end(tmp_path: Path) -> None:
                             "--out", str(found)])
     assert r.exit_code == 0, r.output
     expected = read_rows(data / "statements_expected.csv")
+    with_valid = {e["line_id"] for e in expected if e["valid"] == "Y"}
+    assert f"{1000 - len(with_valid)} lines without a valid ID" in r.output
     got = read_rows(found)
     assert [(g["line_id"], g["normalised"], g["valid"]) for g in got] == [
         (e["line_id"], e["normalised"], e["valid"]) for e in expected]

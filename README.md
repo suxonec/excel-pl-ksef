@@ -9,7 +9,7 @@ It is a bridge for cash application and AP teams, not the long-term ERP integrat
 
 | Module | Excel | CLI |
 |---|---|---|
-| M1 Detect IZ / KSeF numbers in statement text | `1_Detect` + **Detect IDs** | `ksefiz detect` |
+| M1 Detect IZ / KSeF numbers in statement text (lines without a valid ID turn red) | `1_Detect` + **Detect IDs** | `ksefiz detect` |
 | M2 Validate format + CRC-8 | worksheet functions | `ksefiz validate` |
 | M4 Match decoded rows to ERP open items | `3_Match` + **Match open items** | `ksefiz match` |
 | M3 Decode IZ to invoices | `2_Decode` + button | `ksefiz decode` |

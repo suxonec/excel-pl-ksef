@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from typing import Any
 
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
@@ -38,6 +39,11 @@ def _block(ws: Worksheet, first_col: int, fields: list[str]) -> list[Row]:
     return rows
 
 
+def _is_red(cell: Any) -> bool:
+    rgb = str(getattr(cell.fill.fgColor, "rgb", "") or "")
+    return cell.fill.fill_type == "solid" and rgb.upper().endswith("FFC7CE")
+
+
 def _first_diff(a: list[tuple[str, ...]], b: list[tuple[str, ...]]) -> str:
     for i, (x, y) in enumerate(zip(a, b, strict=False)):
         if x != y:
@@ -63,6 +69,18 @@ def main(path: Path) -> int:
     else:
         failures += 1
         print("detect: MISMATCH\n" + _first_diff(vba_det, py_det))
+
+    # Lines without a valid ID must be the ones RunDetect painted red (A:F)
+    py_red = {s["line_id"] for s in statements
+              if not any(d.check.valid for d in detect(s["free_text"]))}
+    vba_red = {_s(row[0].value) for row in ws.iter_rows(min_row=2, max_col=6)
+               if row[0].value is not None and _is_red(row[0])}
+    if vba_red == py_red:
+        print(f"highlight: OK, {len(py_red)} lines without a valid ID are red")
+    else:
+        failures += 1
+        print(f"highlight: MISMATCH red={len(vba_red)} expected={len(py_red)}; "
+              f"e.g. missing {sorted(py_red - vba_red)[:3]}, extra {sorted(vba_red - py_red)[:3]}")
 
     decoded = _block(wb["2_Decode"], 3, DECODED_FIELDS)
     open_items = _block(wb["3_Match"], 1, OPEN_ITEM_FIELDS)

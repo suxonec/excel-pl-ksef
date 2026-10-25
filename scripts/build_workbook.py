@@ -102,7 +102,8 @@ def build(demo: bool, local: bool = False) -> Workbook:
             "buttons need Config > helper_path; Mac: run scripts/install_mac_helper.sh once."),
         (15, "How to use"),
         (16, "1. 1_Detect: paste statement lines into A2:F (line_id, date, amount, currency, payer,"
-             " free_text). Click Detect IDs. Results land in H:N as values."),
+             " free_text). Click Detect IDs. Results land in H:N as values; lines without a "
+             "valid IZ / KSeF number turn red."),
         (17, "2. 2_Decode: paste IZ into A2 or click 'Take IZ from 1_Detect', then Decode. "
              "Results in C:K. Esc cancels a running job."),
         (18, "3. 3_Match: paste the ERP open items extract into A2:F. Click Match. Output: H:S."),

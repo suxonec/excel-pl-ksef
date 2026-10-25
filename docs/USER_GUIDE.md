@@ -50,6 +50,7 @@ Buttons marked *(KSeF)* contact KSeF. The others work fully **offline**, includi
    - The tool finds IZ and KSeF numbers even when the bank has mangled them: lowercase, missing hyphens, spaces instead of hyphens, line breaks in the middle, or text glued to the front (`REF:`, `FV`).
    - Each hit shows `kind` (IZ / KSEF), the cleaned-up `normalised` form, `crc_ok` and `valid`.
    - `valid = N` with reason `crc` means the ID is mistyped. Ask the payer, or look it up by amount. Don't send it to KSeF.
+   - Statement lines with **no valid IZ or KSeF number** (nothing found, or only mistyped IDs) are highlighted **red** in A:F. These are the ones to clear manually, for example by amount, payer or invoice number in the text. The status bar and the `Log` sheet show how many there are. The highlight is reset on every run.
 2. **2_Decode.** Click **Take IZ from 1_Detect**. It copies every *valid* IZ, once each, into column A. You can also paste IZ there yourself. Then click **Decode (KSeF)**.
    - You get one row per invoice: IZ, KSeF number, amount, currency, description and `details_hidden`.
    - Amount and description are visible when your company created the IZ or is the seller or buyer on the invoice. Otherwise `details_hidden = true` and the amount is blank.

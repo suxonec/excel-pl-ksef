@@ -2,13 +2,19 @@ Attribute VB_Name = "modDetect"
 ' M1: find IZ and KSeF numbers in pasted bank statement lines (sheet 1_Detect).
 ' Input  A:F  line_id, date, amount, currency, payer, free_text   (row 2 down)
 ' Output H:N  line_id, kind, raw, normalised, crc_ok, valid, reason (values only)
+' Input lines with no valid IZ / KSeF number are highlighted red in A:F.
 ' Same output as `ksefiz detect`.
 Option Explicit
+
+' Excel's "Bad" style colours
+Private Const RED_FILL As Long = 13551615   ' RGB(255, 199, 206)
+Private Const RED_FONT As Long = 393372     ' RGB(156, 0, 6)
 
 Public Sub RunDetect()
     Dim ws As Worksheet, lastRow As Long, data As Variant, r As Long
     Dim hits As Collection, h As Variant, out() As Variant, cnt As Long, valid As Long
     Dim kind As String, norm As String, crcOk As Boolean, ok As Boolean, reason As String
+    Dim lineOk As Boolean, redRows As Range, redLines As Long
 
     Set ws = ThisWorkbook.Worksheets("1_Detect")
     ws.Range("H2:N" & ws.Rows.Count).ClearContents
@@ -19,9 +25,11 @@ Public Sub RunDetect()
     End If
 
     Application.ScreenUpdating = False
+    ClearHighlight ws
     data = ws.Range("A2:F" & lastRow).Value
     ReDim out(1 To 7, 1 To 1)
     For r = 1 To UBound(data, 1)
+        lineOk = False
         Set hits = DetectIds(CellText(data(r, 6)))
         For Each h In hits
             CheckId CStr(h(0)), kind, norm, crcOk, ok, reason
@@ -35,17 +43,53 @@ Public Sub RunDetect()
             out(6, cnt) = IIf(ok, "Y", "N")
             out(7, cnt) = reason
             If ok Then valid = valid + 1
+            If ok Then lineOk = True
         Next h
+        If Not lineOk And Not InputRowBlank(data, r) Then
+            redLines = redLines + 1
+            If redRows Is Nothing Then
+                Set redRows = ws.Range("A" & r + 1 & ":F" & r + 1)
+            Else
+                Set redRows = Union(redRows, ws.Range("A" & r + 1 & ":F" & r + 1))
+            End If
+            If redRows.Areas.Count >= 200 Then  ' keep Union fast on long statements
+                PaintRed redRows
+                Set redRows = Nothing
+            End If
+        End If
     Next r
+    If Not redRows Is Nothing Then PaintRed redRows
 
     If cnt > 0 Then
         ws.Range("H2:N" & cnt + 1).NumberFormat = "@"
         ws.Range("H2:N" & cnt + 1).Value = TransposeRows(out, cnt, 7)
     End If
     Application.ScreenUpdating = True
-    LogOperation "detect", 0, (lastRow - 1) & " lines, " & cnt & " candidates, " & valid & " valid"
-    Application.StatusBar = "Detect: " & cnt & " candidates, " & valid & " valid"
+    LogOperation "detect", 0, (lastRow - 1) & " lines, " & cnt & " candidates, " & valid & _
+                 " valid, " & redLines & " lines without a valid ID"
+    Application.StatusBar = "Detect: " & cnt & " candidates, " & valid & " valid; " & _
+                            redLines & " lines without a valid ID (red)"
 End Sub
+
+Private Sub ClearHighlight(ByVal ws As Worksheet)
+    With ws.Range("A2:F" & ws.Rows.Count)
+        .Interior.Pattern = xlNone
+        .Font.ColorIndex = xlAutomatic
+    End With
+End Sub
+
+Private Sub PaintRed(ByVal rng As Range)
+    rng.Interior.Color = RED_FILL
+    rng.Font.Color = RED_FONT
+End Sub
+
+Private Function InputRowBlank(ByVal a As Variant, ByVal r As Long) As Boolean
+    Dim c As Long
+    For c = 1 To 6
+        If Trim$(CellText(a(r, c))) <> "" Then Exit Function
+    Next c
+    InputRowBlank = True
+End Function
 
 ' ---------- shared helpers (also used by modMatch) ----------
 

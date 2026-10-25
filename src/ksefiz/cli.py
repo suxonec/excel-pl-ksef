@@ -54,9 +54,12 @@ def detect_cmd(
     """M1: find IZ and KSeF numbers in bank statement lines."""
     rows = read_rows(in_path)
     out = []
+    without_valid = 0  # lines the workbook highlights red
     for i, r in enumerate(rows, start=1):
         text = r.get(text_col, "") if text_col and text_col in r else " ".join(r.values())
-        for d in iter_detect(text):
+        found = list(iter_detect(text))
+        without_valid += not any(d.check.valid for d in found)
+        for d in found:
             out.append({
                 "line_id": r.get("line_id", str(i)), "kind": d.check.kind,
                 "raw": d.raw.replace("\r", " ").replace("\n", " "),
@@ -65,7 +68,8 @@ def detect_cmd(
             })
     write_rows(out_path, DETECT_FIELDS, out, delimiter)
     valid = sum(o["valid"] == "Y" for o in out)
-    typer.echo(f"{len(rows)} lines, {len(out)} candidates, {valid} valid -> {out_path}")
+    typer.echo(f"{len(rows)} lines, {len(out)} candidates, {valid} valid, "
+               f"{without_valid} lines without a valid ID -> {out_path}")
 
 
 @app.command("validate")

@@ -5,10 +5,24 @@ Attribute VB_Name = "modSelfTest"
 Option Explicit
 
 Public Sub RunSelfTest()
-    Dim ws As Worksheet, n1 As Long, n2 As Long, r As Long, pass As Long, fails As String
+    Dim pass As Long, total As Long, fails As String
+    SelfTestRun pass, total, fails
+    If fails = "" Then
+        MsgBox "Self-test passed: " & pass & "/" & total & " vectors.", vbInformation
+    Else
+        Debug.Print fails
+        MsgBox "Self-test FAILED: " & pass & "/" & total & " passed." & vbLf & vbLf & _
+               Left$(fails, 900), vbExclamation
+    End If
+End Sub
+
+' Runs all vectors without dialogs (also used on workbook open). fails = "" when all pass.
+Public Sub SelfTestRun(ByRef pass As Long, ByRef total As Long, ByRef fails As String)
+    Dim ws As Worksheet, n1 As Long, n2 As Long, r As Long
     Dim kind As String, norm As String, crcOk As Boolean, ok As Boolean, reason As String
     Dim got As String, expected As String, hits As Collection, h As Variant
 
+    pass = 0: fails = ""
     Set ws = ThisWorkbook.Worksheets("_Vectors")
     n1 = CLng(ws.Range("K1").Value)
     n2 = CLng(ws.Range("K2").Value)
@@ -42,13 +56,7 @@ Public Sub RunSelfTest()
         End If
     Next r
 
-    ws.Range("K3").Value = pass & "/" & (n1 + n2) & " passed " & Format$(Now, "yyyy-mm-dd hh:nn:ss")
-    LogOperation "self-test", 0, pass & "/" & (n1 + n2) & " passed"
-    If fails = "" Then
-        MsgBox "Self-test passed: " & pass & "/" & (n1 + n2) & " vectors.", vbInformation
-    Else
-        Debug.Print fails
-        MsgBox "Self-test FAILED: " & pass & "/" & (n1 + n2) & " passed." & vbLf & vbLf & _
-               Left$(fails, 900), vbExclamation
-    End If
+    total = n1 + n2
+    ws.Range("K3").Value = pass & "/" & total & " passed " & Format$(Now, "yyyy-mm-dd hh:nn:ss")
+    LogOperation "self-test", 0, pass & "/" & total & " passed"
 End Sub

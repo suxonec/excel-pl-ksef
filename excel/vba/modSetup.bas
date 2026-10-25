@@ -1,5 +1,7 @@
 Attribute VB_Name = "modSetup"
 ' One-time setup after importing the .bas modules: run SetupWorkbook, then save as .xlsm.
+' AutoConfigure runs on every open (ThisWorkbook.Workbook_Open, see ThisWorkbook.vba):
+' Windows settings from the setup assistant -> Config, buttons, quiet self-test.
 Option Explicit
 
 Public Sub SetupWorkbook()
@@ -10,6 +12,57 @@ End Sub
 ' No dialog, for scripts/build_xlsm.ps1.
 Public Sub SetupWorkbookQuiet()
     AddAllButtons
+End Sub
+
+Public Sub AutoConfigure()
+    Dim wasSaved As Boolean, pass As Long, total As Long, fails As String, ws As Worksheet
+    On Error GoTo Failed
+    wasSaved = ThisWorkbook.Saved
+    ApplyUserSettings
+    If ThisWorkbook.Worksheets("README").Buttons.Count = 0 Then AddAllButtons
+    SelfTestRun pass, total, fails
+    Set ws = ThisWorkbook.Worksheets("README")
+    ws.Range("A5").Value = "Self-test " & pass & "/" & total & IIf(fails = "", " passed", " FAILED") & _
+                           " on open, " & Format$(Now, "yyyy-mm-dd hh:nn")
+    ws.Range("A5").Font.Color = IIf(fails = "", RGB(55, 86, 35), RGB(192, 0, 0))
+    ThisWorkbook.Saved = wasSaved   ' opening alone should not prompt "save changes?"
+    If fails <> "" Then
+        MsgBox "KSeF IZ Tool self-test FAILED (" & pass & "/" & total & "). The VBA modules " & _
+               "do not match this version - reinstall or re-import them.", vbExclamation
+    End If
+    Exit Sub
+Failed:
+    Application.StatusBar = "KSeF IZ Tool: automatic setup skipped (" & Err.Description & ")"
+End Sub
+
+' Windows: copy environment / NIP / profile written by the setup assistant
+' (%USERPROFILE%\.ksefiz\excel.ini) into Config, and default helper_path to the installed
+' ksefiz.exe. On Mac (sandboxed Excel cannot read the home folder) Config is edited by hand.
+Private Sub ApplyUserSettings()
+#If Mac Then
+    Exit Sub
+#Else
+    Dim path As String, f As Integer, txt As String, p As Long, key As String
+    path = Environ("USERPROFILE") & "\.ksefiz\excel.ini"
+    If FileExists(path) Then
+        f = FreeFile
+        Open path For Input As #f
+        Do While Not EOF(f)
+            Line Input #f, txt
+            p = InStr(txt, "=")
+            If p > 1 And Left$(txt, 1) <> ";" Then
+                key = LCase$(Trim$(Left$(txt, p - 1)))
+                If key = "environment" Or key = "context_nip" Or key = "profile" Then
+                    SetCfgValue key, Trim$(Mid$(txt, p + 1))
+                End If
+            End If
+        Loop
+        Close #f
+    End If
+    If CfgValue("helper_path") = "" Or CfgValue("helper_path") = "ksefiz" Then
+        If FileExists(InstalledHelperPath()) Then SetCfgValue "helper_path", InstalledHelperPath()
+    End If
+#End If
 End Sub
 
 Private Sub AddAllButtons()

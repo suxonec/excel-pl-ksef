@@ -12,9 +12,8 @@ from pathlib import Path
 
 from ksefiz import match as m
 from ksefiz.io_csv import Row, write_rows
-from ksefiz.iz import KIND_IZ, KIND_KSEF, crc8, detect
+from ksefiz.iz import KIND_IZ, KIND_KSEF, crc8, detect, nip_checksum_ok
 
-_NIP_WEIGHTS = (6, 5, 7, 2, 3, 4, 5, 6, 7)
 _HEX = "0123456789ABCDEF"
 
 STATEMENT_FIELDS = ["line_id", "date", "amount", "currency", "payer", "free_text"]
@@ -24,11 +23,6 @@ EXPECTED_DETECT_FIELDS = ["line_id", "kind", "normalised", "valid"]
 EXPECTED_MATCH_FIELDS = ["iz", "ksef_number", "status"]
 
 MANGLE_STYLES = ("plain", "lower", "nohyphen", "spaces", "linebreak", "glued")
-
-
-def nip_checksum_ok(nip: str) -> bool:
-    s = sum(int(d) * w for d, w in zip(nip[:9], _NIP_WEIGHTS, strict=True)) % 11
-    return s != 10 and s == int(nip[9])
 
 
 def fake_nip(rng: random.Random) -> str:

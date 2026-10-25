@@ -1,0 +1,60 @@
+name: windows-installer
+
+on:
+  push:
+    branches: [main, "windows-*"]
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  installer:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install build tools
+        run: pip install ".[packaging]" oletools
+      - name: Verify the bundled workbook contains exactly excel/vba
+        if: hashFiles('excel/dist/KSeF_IZ_Tool.xlsm') != ''
+        run: python scripts/verify_xlsm_vba.py excel/dist/KSeF_IZ_Tool.xlsm
+      - name: Build ksefiz.exe and the setup assistant
+        run: pyinstaller packaging/windows/ksefiz.spec --noconfirm --distpath dist --workpath build
+      - name: Build the installer
+        shell: pwsh
+        run: |
+          $v = python -c "import ksefiz; print(ksefiz.__version__)"
+          choco install innosetup -y --no-progress
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=$v" packaging\windows\ksefiz.iss
+      - name: Smoke test (silent install, helper, registry, uninstall)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $setup = (Get-ChildItem dist\KSeF-IZ-Tool-Setup-*.exe).FullName
+          Start-Process $setup -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/LOG=install.log' -Wait
+          $app = "$env:LOCALAPPDATA\Programs\KSeF IZ Tool"
+          $exe = "$app\ksefiz.exe"
+          if (-not (Test-Path "$app\KSeF IZ Setup.exe")) { throw "setup assistant missing" }
+          & $exe version
+          & $exe detect --in testdata\statements_sample.csv --out found.csv
+          if ($LASTEXITCODE) { throw "detect failed" }
+          "TESTTOKEN-0000000000-0000000000-SMOKE" | & $exe token-set --env test --nip 1111111111 --stdin --no-test
+          if ($LASTEXITCODE) { throw "token-set failed" }
+          $doc = & $exe doctor | Out-String
+          Write-Host $doc
+          if ($doc -notmatch "WinVaultKeyring|Windows") { throw "Windows credential store not used" }
+          if ($doc -notmatch "token stored") { throw "token not stored" }
+          if ($doc -notmatch "trusted location:\s+registered") { throw "trusted location not registered" }
+          $key = 'HKCU:\Software\Microsoft\Office\16.0\Excel\Security\Trusted Locations\KSeFIZTool'
+          (Get-ItemProperty $key).Path
+          Start-Process "$app\unins000.exe" -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES' -Wait
+          Start-Sleep -Seconds 3
+          if (Test-Path $key) { throw "trusted location not removed on uninstall" }
+          if (Test-Path $exe) { throw "helper not removed on uninstall" }
+          Write-Host "smoke test passed"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KSeF-IZ-Tool-Setup
+          path: dist/KSeF-IZ-Tool-Setup-*.exe
+          if-no-files-found: error

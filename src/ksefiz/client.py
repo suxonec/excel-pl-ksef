@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import random
+import ssl
 import time
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
@@ -15,6 +16,14 @@ from ksefiz import __version__
 from ksefiz.config import BASE_URLS, Env
 
 RETRY_STATUSES = (429, 502, 503, 504)
+
+
+def tls_context() -> ssl.SSLContext:
+    """Certificate verification against the operating system's trust store, so company
+    TLS-inspection roots (Windows certificate store, macOS Keychain) are honoured."""
+    import truststore
+
+    return truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 MAX_RETRIES = 5
 MAX_BACKOFF_S = 60.0
 
@@ -100,6 +109,7 @@ class KsefClient:
             base_url=BASE_URLS[env],
             timeout=timeout,
             transport=transport,
+            verify=tls_context(),
             headers={
                 "X-Error-Format": "problem-details",
                 "Accept": "application/json",

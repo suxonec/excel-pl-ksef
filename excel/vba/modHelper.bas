@@ -46,8 +46,12 @@ Public Function RunHelperJob(ByVal op As String, ByVal header As Variant, ByVal 
     helper = CfgValue("helper_path")
     env = UCase$(CfgValue("environment"))
     If env = "" Then env = "TEST"
+    If (helper = "" Or helper = "ksefiz") And FileExists(InstalledHelperPath()) Then
+        helper = InstalledHelperPath()
+    End If
     If helper = "" Or helper = "ksefiz" Then
-        MsgBox "Set Config > helper_path to the full path of the ksefiz executable.", vbExclamation
+        MsgBox "ksefiz was not found. Install the KSeF IZ Tool (Windows) or set " & _
+               "Config > helper_path to the full path of the ksefiz executable.", vbExclamation
         Exit Function
     End If
     If env = "PROD" Then
@@ -135,6 +139,15 @@ Public Function ResultValue(ByVal res As Collection, ByVal key As String) As Str
     ResultValue = CStr(res(key))
     If Err.Number <> 0 Then ResultValue = ""
     Err.Clear
+End Function
+
+' Where the Windows installer puts ksefiz.exe ("" on Mac).
+Public Function InstalledHelperPath() As String
+#If Mac Then
+    InstalledHelperPath = ""
+#Else
+    InstalledHelperPath = Environ("LOCALAPPDATA") & "\Programs\KSeF IZ Tool\ksefiz.exe"
+#End If
 End Function
 
 ' ---------- launching ----------

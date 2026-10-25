@@ -86,6 +86,17 @@ class Detection:
     check: IdCheck
 
 
+_NIP_WEIGHTS = (6, 5, 7, 2, 3, 4, 5, 6, 7)
+
+
+def nip_checksum_ok(nip: str) -> bool:
+    """Official mod-11 NIP checksum (real NIPs pass; TEST and synthetic NIPs need not)."""
+    if len(nip) != 10 or not nip.isascii() or not nip.isdigit():
+        return False
+    s = sum(int(d) * w for d, w in zip(nip[:9], _NIP_WEIGHTS, strict=True)) % 11
+    return s != 10 and s == int(nip[9])
+
+
 def crc8(data: bytes) -> str:
     c = 0
     for x in data:

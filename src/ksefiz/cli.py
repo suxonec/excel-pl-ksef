@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import getpass
 import hashlib
+import sys
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from datetime import date
@@ -11,7 +13,7 @@ from typing import Annotated
 
 import typer
 
-from ksefiz import __version__, auth, excel_job, operations, synthetic, testenv
+from ksefiz import __version__, auth, excel_job, operations, synthetic, testenv, userconfig
 from ksefiz.audit import AuditLog
 from ksefiz.client import ApiError, KsefClient
 from ksefiz.config import DEFAULT_ENV, Env
@@ -279,6 +281,65 @@ def query_cmd(date_from: Annotated[str, typer.Option("--from", help="YYYY-MM-DD"
         rows = operations.query(api, d1, d2, created_in_current_context=True if own_only else None)
     write_rows(out_path, operations.QUERY_FIELDS, rows, delimiter)
     typer.echo(f"{len(rows)} IZ in {len(operations.windows(d1, d2))} window(s) -> {out_path}")
+
+
+@app.command("token-set")
+def token_set(
+    nip: Annotated[str, typer.Option(help="Company NIP the token belongs to")],
+    env: EnvOpt = DEFAULT_ENV,
+    profile: ProfileOpt = DEFAULT_PROFILE,
+    stdin: Annotated[bool, typer.Option("--stdin", help="Read the token from stdin")] = False,
+    test: Annotated[bool, typer.Option(help="Log in once to check the token")] = True,
+) -> None:
+    """Store a KSeF token in the OS credential store (input hidden) and select it for Excel."""
+    nip = nip.strip().replace("-", "").replace(" ", "")
+    err = userconfig.validate_nip(nip, env)
+    if err:
+        raise _fail(ValueError(err))
+    if env == Env.PROD:
+        typer.confirm("PROD: real data with legal effect. Store a PROD token?", abort=True)
+    token = sys.stdin.readline().strip() if stdin else getpass.getpass("KSeF token (hidden): ")
+    if not userconfig.looks_like_token(token.strip()):
+        raise _fail(ValueError("that does not look like a KSeF token (20-200 characters, "
+                               "no spaces)"))
+    token = token.strip()
+    if test:
+        res = userconfig.test_connection(env, nip, token)
+        if not res.ok:
+            raise _fail(RuntimeError(res.message + " Token NOT stored."))
+        typer.echo(res.message)
+    ini = userconfig.save_setup(env, nip, token, profile)
+    typer.echo(f"token stored in the OS credential store; workbook settings: {ini}")
+
+
+@app.command("doctor")
+def doctor() -> None:
+    """Show what this computer is set up with (for support; prints no secrets)."""
+    import keyring
+
+    typer.echo(f"ksefiz {__version__} ({'packaged' if getattr(sys, 'frozen', False) else 'python'}"
+               f", {sys.platform})")
+    typer.echo(f"executable:        {sys.executable}")
+    typer.echo(f"credential store:  {keyring.get_keyring().__class__.__module__}")
+    ini = userconfig.read_excel_ini()
+    typer.echo(f"workbook settings: {userconfig.excel_ini_path()} "
+               f"{ini if ini else '(not set - run the setup assistant)'}")
+    for env in Env:
+        ctx = load_context(env)
+        if ctx:
+            has = "token stored" if get_token(env, ctx.nip) else "NO token"
+            typer.echo(f"{env.value.upper():5} context:     NIP {ctx.nip}, {has}")
+    wb = userconfig.workbook_path()
+    typer.echo(f"workbook:          {wb} ({'present' if wb.exists() else 'missing'})")
+    typer.echo(f"trusted location:  {userconfig.trusted_location_status()}")
+
+
+@app.command("setup")
+def setup_cmd() -> None:
+    """Open the setup assistant (environment, NIP, token, connection test)."""
+    from ksefiz import setup_gui
+
+    setup_gui.main()
 
 
 @app.command("excel-run", hidden=True)

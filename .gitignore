@@ -6,8 +6,8 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-dist/
-build/
+/dist/
+/build/
 
 # Secrets and local config
 .env
@@ -22,6 +22,9 @@ output/
 # Excel working copies (may contain real data). The macro-enabled tool is built
 # locally from excel/KSeF_IZ_Tool_template.xlsx + excel/vba/*.bas
 *.xlsm
+# ...except the data-free release workbook bundled by the installer (scripts/build_xlsm.ps1;
+# CI proves its VBA equals excel/vba with scripts/verify_xlsm_vba.py)
+!excel/dist/KSeF_IZ_Tool.xlsm
 ~$*
 .DS_Store
 

@@ -23,8 +23,12 @@ KEYRING_SERVICE = "ksefiz"
 DEFAULT_PROFILE = "default"
 
 
+def ksefiz_home() -> Path:
+    return Path(os.environ.get("KSEFIZ_HOME", Path.home() / ".ksefiz"))
+
+
 def state_dir(env: Env) -> Path:
-    return Path(os.environ.get("KSEFIZ_HOME", Path.home() / ".ksefiz")) / env.value
+    return ksefiz_home() / env.value
 
 
 def state_file(env: Env, stem: str, suffix: str, profile: str = DEFAULT_PROFILE) -> Path:

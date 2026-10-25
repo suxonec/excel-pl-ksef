@@ -62,6 +62,8 @@ The HTTP client (`httpx`) verifies TLS certificates and does **not** follow redi
 
 **Least privilege.** `CollectiveIdentifierManage` allows generating, decoding, reverse lookup and query of IZ only. Invoice sending, invoice download and permission management are **not** possible with it. That was verified on TEST: the same context needed a separate owner login to send test invoices.
 
+**Setup on Windows.** The setup assistant (`ksefiz setup`, `KSeF IZ Setup.exe`) and `ksefiz token-set` read the token from a masked field or hidden prompt. They test it by logging in, and store it **only** if the login works. `~/.ksefiz/excel.ini` holds environment, NIP and profile for the workbook (ASCII, no secrets).
+
 **Token storage.**
 - The token is held in `keyring`, service `ksefiz`, account `<env>:<nip>`. Anyone who can run code as the same OS user can read it. That is the normal trust boundary of a per-user credential store.
 - `KSEF_TOKEN` / `KSEF_NIP` environment variables are honoured **on TEST only**.
@@ -93,6 +95,16 @@ They make **no network calls** and use no `Declare` or Win32 API calls. The macr
 Tests: starting `/bin/sh`, a job folder outside the container, and an argument containing `; touch /tmp/pwned` were all refused or inert. Residual risk: any macro-enabled workbook can call this launcher. The worst it can do is start `ksefiz` with chosen arguments, which on PROD still needs the explicit `--confirm-prod`.
 
 **Windows** uses `WScript.Shell.Run` with `cmd /v:on`. VBA allows only `[A-Za-z0-9-_.:/\ ]` in arguments and quotes each one. Some endpoint-protection setups (Defender ASR rule "Block Office applications from creating child processes") block this. That needs an IT decision or an exclusion for the helper.
+
+**Windows installer** (`packaging/windows/ksefiz.iss`, Inno Setup):
+- It installs per user (`PrivilegesRequired=lowest`), with no services, no autostart and no admin rights.
+- It writes exactly one registry key: an Excel **Trusted Location** under `HKCU\…\Excel\Security\Trusted Locations\KSeFIZTool`, for `%USERPROFILE%\KSeF IZ Tool\` only (`AllowSubfolders=0`). The uninstaller removes it.
+- Effect: any `.xlsm` placed in that folder runs its macros without a prompt, so the folder must hold only the tool's workbook and its working copies. The folder is deliberately outside OneDrive-synced Documents.
+- If group policy disables user Trusted Locations, the assistant detects it and tells the user to ask IT.
+- The bundled workbook `excel/dist/KSeF_IZ_Tool.xlsm` is checked in CI by `scripts/verify_xlsm_vba.py`: its VBA must equal `excel/vba/` exactly (identifier case aside), and sheet modules must be empty.
+- The installer and executables are **not code-signed** yet (SmartScreen warning).
+
+**TLS:** the helper verifies certificates against the **operating system's trust store** (`truststore`), so company TLS-inspection roots work and no separate CA bundle needs to be maintained.
 
 ## 6. Integrity and correctness controls
 
@@ -129,14 +141,15 @@ Current state: **minimum versions only, no lockfile, no hash pinning.** The tool
 | # | Item | Owner | Status |
 |---|---|---|---|
 | 1 | Validation on **DEMO** with a real certificate / token (delivery step 7) | IT + tax | not started; needs credentials |
-| 2 | **Windows Excel 365** run of the buttons (VBA Windows branch and `build_xlsm.ps1` are untested; Python is CI-tested on Windows) | IT | open |
+| 2 | **Windows Excel 365** run of the buttons and the installer / assistant (`build_xlsm.ps1`, VBA Windows branch, GUI). CI covers silent install, helper, credential store, registry and uninstall. | owner (Windows PC) | in progress |
 | 3 | Generate an IZ with **500 invoices** on TEST (acceptance criterion) | dev | **done** 2026-10-24 (see HANDOVER.md) |
 | 4 | Policy: macro-enabled workbook allowed? AppleScript launcher (Mac) / `WScript.Shell` + ASR rules (Windows)? Code-sign the VBA project? | security | open (Q5) |
 | 5 | Production auth route: KSeF token vs XAdES certificate (Q4); who generates and rotates tokens; revocation procedure (`DELETE /tokens/{ref}`; no CLI command yet) | security | open |
-| 6 | Dependency pinning (lockfile with hashes) and packaging (signed single executable) | dev + security | open |
+| 6 | Dependency pinning (lockfile with hashes) and **code signing** of installer and executables (company certificate; removes the SmartScreen warning) | dev + security | packaging done (installer); pinning and signing open |
 | 7 | Retention and access rules for the audit log, the workbook copies and the `Log` sheet (GDPR for sole-trader data) | compliance | open |
 | 8 | Behaviour and procedure when KSeF is unavailable (fallback to individual KSeF numbers) | finance ops | documented in the user guide; confirm (Q7) |
 | 9 | System of record for generated IZ (Q6) | finance + tax | open |
+| 11 | Approve the per-user **Excel Trusted Location** the installer registers, or replace it with a policy-deployed location / signed VBA project | security | open |
 | 10 | Publicly visible repository: content is synthetic / TEST only. Committed files were scanned for user names, local paths, test-context NIPs, KSeF numbers and checksum-valid NIPs (none apart from the MF documentation examples). Machine-specific workbooks are built with `--local` into git-ignored `output/`. Commit author metadata (name, e-mail) is part of the git history. Confirm that public visibility is intended. | owner | open |
 
 References:

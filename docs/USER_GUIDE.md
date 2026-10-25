@@ -109,9 +109,9 @@ A generated IZ is permanent in KSeF. On PROD it has legal effect, so check befor
 
 | Message | Fix |
 |---|---|
-| `Set Config > helper_path…` | ask IT for the path to `ksefiz` (Mac `…/.venv/bin/ksefiz`, Windows `…\.venv\Scripts\ksefiz.exe`) |
+| `ksefiz was not found…` | Windows: run the installer. Mac / manual setup: set `Config > helper_path` to the `ksefiz` executable. |
 | `Could not start ksefiz through AppleScript` (Mac) | IT runs `scripts/install_mac_helper.sh` once. Allow Excel when macOS asks. |
-| `no TEST context/token for profile …` | the KSeF token is not set up on this computer (IT) |
+| `no … context/token for profile …` | the token is not set up on this computer: run **KSeF IZ Tool setup** (Windows) or `ksefiz token-set` |
 | `ksefiz did not report progress for 900 s` | network or KSeF problem. The job folder is kept for IT. |
 | `HTTP 429` / long waits | the request budget is used up. Wait, or split the work. |
 | `450 … Token nieaktywny` / `415 …` | the KSeF token was revoked or lacks the permission (IT) |
@@ -119,10 +119,29 @@ A generated IZ is permanent in KSeF. On PROD it has legal effect, so check befor
 
 Every button run adds a line to the `Log` sheet: time, user, environment, operation, number of KSeF requests, input fingerprint, result, error code and trace id. Don't delete rows. It's the audit trail.
 
-## One-time setup (IT / key user)
+## Installing on Windows
+
+1. Run `KSeF-IZ-Tool-Setup-<version>.exe`. No administrator rights are needed.
+   - Until the installer is code-signed, Windows shows **"Windows protected your PC"**. Click **More info → Run anyway**.
+   - The installer puts the helper in `%LOCALAPPDATA%\Programs\KSeF IZ Tool\` and the workbook in `%USERPROFILE%\KSeF IZ Tool\KSeF_IZ_Tool.xlsm`. It registers **only that folder** as an Excel *Trusted Location*, so the workbook's macros run without a warning.
+   - An existing workbook is kept as `KSeF_IZ_Tool.backup-<date>.xlsm` before it's replaced.
+2. The **setup assistant** opens at the end of the installation:
+   1. Choose the environment. **TEST** is for training. On TEST you can tick *"create a test company for me"* if you have no token.
+   2. Enter the company NIP.
+   3. Paste the KSeF token. It needs only the `CollectiveIdentifierManage` permission and is stored in Windows Credential Manager.
+   4. The assistant tests the connection and shows a green tick or a plain-language error.
+3. Open **KSeF IZ Tool** from the Start menu. The workbook picks up the environment and NIP by itself, adds its buttons, and checks itself on open: `README` row 5 shows `Self-test 42/42 passed`. There's nothing to change in `Config`.
+
+To replace an expired token or switch environments (for example to PROD after sign-off), run **KSeF IZ Tool setup** from the Start menu again.
+
+**Uninstalling** (Settings → Apps → KSeF IZ Tool) removes the helper and the Trusted Location. Your workbooks in `%USERPROFILE%\KSeF IZ Tool\` and the stored token are kept. Remove the token in Credential Manager (entry `ksefiz`) if needed.
+
+**If macros are still blocked:** company policy may forbid user Trusted Locations. The assistant warns about this on its last page. Ask IT to trust the folder `%USERPROFILE%\KSeF IZ Tool\`. Keep working copies inside that folder: copies saved to OneDrive, SharePoint or e-mail attachments are not trusted.
+
+## Manual setup (Mac, or without the installer)
 
 1. Install the helper: Python 3.11+, then `pip install` from the repository (see `README.md`). On Mac, also run `scripts/install_mac_helper.sh`.
-2. Create the KSeF token. On TEST: `ksefiz testenv-setup`. For DEMO/PROD, a token with **only** the `CollectiveIdentifierManage` permission is generated in KSeF by an authorised person. It's stored in the computer's credential store, never in the workbook.
-3. Build the workbook: `scripts/build_workbook.py` (empty) or `--demo` (synthetic example data), import `excel/vba/*.bas`, run `SetupWorkbook` and save as `.xlsm`. On Windows, `scripts/build_xlsm.ps1` does this automatically. Keep working copies that contain real data out of shared folders and out of git.
-4. In `Config`, set `helper_path`, `environment` (TEST until sign-off), and `profile` if more than one company context is used.
+2. Store the KSeF token: `ksefiz token-set --env <test|demo|prod> --nip <NIP>`. The input is hidden, the token is tested, and it is saved in the credential store. On TEST, `ksefiz testenv-setup` creates a test company instead. The token needs **only** the `CollectiveIdentifierManage` permission.
+3. Build the workbook: `scripts/build_workbook.py` (empty) or `--demo` (synthetic example data), import `excel/vba/*.bas`, run `SetupWorkbook` and save as `.xlsm`. On Windows, `scripts/build_xlsm.ps1` produces the release workbook. Keep working copies that contain real data out of shared folders and out of git.
+4. In `Config`, set `helper_path`, `environment` (TEST until sign-off), and `profile` if more than one company context is used. On Windows these are filled in automatically from the setup assistant's settings.
 5. Click **Run self-test**. It must show `42/42 passed`.

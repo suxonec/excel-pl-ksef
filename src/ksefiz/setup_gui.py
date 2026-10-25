@@ -290,6 +290,9 @@ class Wizard(tk.Tk):
 
     def __init__(self, scale: float | None = None) -> None:
         super().__init__()
+        # Hidden until laid out: _fit_window measures pages with placeholder texts, which
+        # Windows would otherwise paint (seen in 0.2.0 as flashing "XXXX" screens)
+        self.withdraw()
         if scale:  # tests: simulate a high-DPI screen (Tk points -> pixels)
             self.tk.call("tk", "scaling", scale)
         # On high-DPI Windows screens Tk renders text larger; size everything in scaled units
@@ -333,6 +336,20 @@ class Wizard(tk.Tk):
         self._fit_window()
         self.i = 0
         self.show(0)
+        self._center()
+        self.deiconify()
+
+    def _center(self) -> None:
+        self.update_idletasks()
+        w, h = self.winfo_width(), self.winfo_height()
+        if w <= 1 or h <= 1:  # not realised yet while withdrawn: use the planned size
+            w, h = self.winfo_reqwidth(), self.winfo_reqheight()
+            geo = self.geometry().split("+")[0]
+            if "x" in geo:
+                w, h = (int(v) for v in geo.split("x"))
+        x = max(0, (self.winfo_screenwidth() - w) // 2)
+        y = max(0, (self.winfo_screenheight() - h) // 3)
+        self.geometry(f"{w}x{h}+{x}+{y}")
 
     def px(self, n: float) -> int:
         """Design pixels (at 100 % display scaling) -> pixels on this screen."""

@@ -46,3 +46,32 @@ def test_every_page_fits_and_buttons_visible(percent: int) -> None:
                 page._changed()
     finally:
         w.destroy()
+
+
+def test_window_stays_hidden_while_measuring(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The placeholder texts used for sizing must never be painted on screen."""
+    from ksefiz import setup_gui
+
+    states: list[str] = []
+    original = setup_gui.Wizard._fit_window
+
+    def spy(self: setup_gui.Wizard) -> None:
+        states.append(self.state())
+        original(self)
+        states.append(self.state())
+
+    monkeypatch.setattr(setup_gui.Wizard, "_fit_window", spy)
+    try:
+        w = setup_gui.Wizard()
+    except tk.TclError as e:
+        pytest.skip(f"no display: {e}")
+    try:
+        assert states == ["withdrawn", "withdrawn"]
+        w.update()
+        assert w.state() == "normal"
+        assert w.pages[0].winfo_ismapped() and w.h1.cget("text") == "Welcome"
+        texts = [c.cget("text") for p in w.pages for c in p.winfo_children()
+                 if isinstance(c, tk.ttk.Label)]
+        assert not any("XXXX" in t.replace(" ", "") or "Environment: X" in t for t in texts)
+    finally:
+        w.destroy()

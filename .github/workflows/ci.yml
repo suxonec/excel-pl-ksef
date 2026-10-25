@@ -21,4 +21,4 @@ jobs:
       - run: ruff check .
       - run: mypy
       # e2e tests against KSeF TEST are deselected by default (pyproject addopts)
-      - run: pytest -q
+      - run: pytest -q -rs

@@ -38,7 +38,7 @@ class Page(ttk.Frame):
     subtitle = ""
 
     def __init__(self, wiz: Wizard) -> None:
-        super().__init__(wiz.body, padding=(24, 16))
+        super().__init__(wiz.body, padding=(wiz.px(24), wiz.px(16)))
         self.wiz = wiz
 
     def skip(self) -> bool:
@@ -51,8 +51,8 @@ class Page(ttk.Frame):
         return None
 
     def text(self, t: str, **kw: Any) -> ttk.Label:
-        lbl = ttk.Label(self, text=t, wraplength=540, justify="left", **kw)
-        lbl.pack(anchor="w", pady=(0, 8))
+        lbl = ttk.Label(self, text=t, wraplength=self.wiz.px(560), justify="left", **kw)
+        lbl.pack(anchor="w", pady=(0, self.wiz.px(8)))
         return lbl
 
 
@@ -79,15 +79,15 @@ class Environment(Page):
         super().__init__(wiz)
         for env, (name, desc) in ENV_TEXT.items():
             ttk.Radiobutton(self, text=name, value=env.value, variable=wiz.env,
-                            command=self._changed).pack(anchor="w", pady=(6, 0))
-            ttk.Label(self, text=desc, wraplength=500, foreground="#555").pack(
-                anchor="w", padx=(24, 0))
+                            command=self._changed).pack(anchor="w", pady=(wiz.px(6), 0))
+            ttk.Label(self, text=desc, wraplength=wiz.px(530), foreground="#555").pack(
+                anchor="w", padx=(wiz.px(24), 0))
         self.create = ttk.Checkbutton(
             self, variable=wiz.create_test,
             text="I have no TEST token - create a test company for me (TEST only)")
-        self.create.pack(anchor="w", pady=(14, 0))
-        self.warning = ttk.Label(self, text="", foreground="#c00000", wraplength=520)
-        self.warning.pack(anchor="w", pady=(10, 0))
+        self.create.pack(anchor="w", pady=(wiz.px(14), 0))
+        self.warning = ttk.Label(self, text="", foreground="#c00000", wraplength=wiz.px(560))
+        self.warning.pack(anchor="w", pady=(wiz.px(10), 0))
         self._changed()
 
     def _changed(self) -> None:
@@ -110,7 +110,7 @@ class Company(Page):
         self.entry = ttk.Entry(self, textvariable=wiz.nip, width=20, font=("TkDefaultFont", 12))
         self.entry.pack(anchor="w")
         self.hint = ttk.Label(self, text="", foreground="#c00000")
-        self.hint.pack(anchor="w", pady=(6, 0))
+        self.hint.pack(anchor="w", pady=(wiz.px(6), 0))
         wiz.nip.trace_add("write", lambda *_: self._check())
 
     def skip(self) -> bool:
@@ -144,7 +144,7 @@ class Token(Page):
                   "saved in the operating system's credential store (Windows Credential "
                   "Manager), not in the workbook or any file.")
         self.entry = ttk.Entry(self, textvariable=wiz.token, show="•", width=64)
-        self.entry.pack(anchor="w", pady=(4, 0))
+        self.entry.pack(anchor="w", pady=(wiz.px(4), 0))
         self.show = tk.BooleanVar(value=False)
         ttk.Checkbutton(self, text="Show token", variable=self.show,
                         command=lambda: self.entry.config(show="" if self.show.get()
@@ -156,7 +156,7 @@ class Token(Page):
     def on_show(self) -> None:
         stored = get_token(self.wiz.selected_env(), self.wiz.nip.get())
         if stored:
-            self.keep.pack(anchor="w", before=self.entry, pady=(0, 8))
+            self.keep.pack(anchor="w", before=self.entry, pady=(0, self.wiz.px(8)))
         else:
             self.keep.pack_forget()
             self.wiz.keep_token.set(False)
@@ -183,9 +183,9 @@ class Connect(Page):
     def __init__(self, wiz: Wizard) -> None:
         super().__init__(wiz)
         self.status = self.text("")
-        self.bar = ttk.Progressbar(self, mode="indeterminate", length=420)
-        self.bar.pack(anchor="w", pady=(4, 12))
-        self.result = ttk.Label(self, text="", wraplength=540, justify="left")
+        self.bar = ttk.Progressbar(self, mode="indeterminate", length=wiz.px(420))
+        self.bar.pack(anchor="w", pady=(wiz.px(4), wiz.px(12)))
+        self.result = ttk.Label(self, text="", wraplength=wiz.px(560), justify="left")
         self.result.pack(anchor="w")
         self.retry = ttk.Button(self, text="Try again", command=self.start)
         self.ok = False
@@ -242,7 +242,7 @@ class Connect(Page):
         if ok:
             self.wiz.token.set("")  # do not keep the secret in the UI
         else:
-            self.retry.pack(anchor="w", pady=(12, 0))
+            self.retry.pack(anchor="w", pady=(self.wiz.px(12), 0))
         self.wiz.set_next_enabled(ok)
 
     def validate(self) -> str | None:
@@ -255,12 +255,12 @@ class Done(Page):
 
     def __init__(self, wiz: Wizard) -> None:
         super().__init__(wiz)
-        self.summary = ttk.Label(self, text="", justify="left", wraplength=540)
+        self.summary = ttk.Label(self, text="", justify="left", wraplength=wiz.px(560))
         self.summary.pack(anchor="w")
         self.open_wb = tk.BooleanVar(value=True)
         self.open_box = ttk.Checkbutton(self, text="Open the workbook now",
                                         variable=self.open_wb)
-        self.open_box.pack(anchor="w", pady=(14, 0))
+        self.open_box.pack(anchor="w", pady=(wiz.px(14), 0))
 
     def on_show(self) -> None:
         wb = userconfig.workbook_path()
@@ -288,11 +288,13 @@ class Done(Page):
 class Wizard(tk.Tk):
     PAGES: tuple[type[Page], ...] = (Welcome, Environment, Company, Token, Connect, Done)
 
-    def __init__(self) -> None:
+    def __init__(self, scale: float | None = None) -> None:
         super().__init__()
+        if scale:  # tests: simulate a high-DPI screen (Tk points -> pixels)
+            self.tk.call("tk", "scaling", scale)
+        # On high-DPI Windows screens Tk renders text larger; size everything in scaled units
+        self.factor = max(1.0, float(self.tk.call("tk", "scaling")) / (96 / 72))
         self.title(f"{userconfig.APP_NAME} setup")
-        self.geometry("640x460")
-        self.resizable(False, False)
         ini = userconfig.read_excel_ini()
         env = (ini.get("environment") or "TEST").lower()
         self.env = tk.StringVar(value=env if env in {e.value for e in Env} else "test")
@@ -306,28 +308,61 @@ class Wizard(tk.Tk):
         self.create_test = tk.BooleanVar(value=False)
         self.nip_result = nip
 
-        head = tk.Frame(self, bg="#1f4e78", padx=24, pady=12)
+        head = tk.Frame(self, bg="#1f4e78", padx=self.px(24), pady=self.px(12))
         head.pack(fill="x")
         self.h1 = tk.Label(head, text="", bg="#1f4e78", fg="white",
                            font=("TkDefaultFont", 14, "bold"))
         self.h1.pack(anchor="w")
         self.h2 = tk.Label(head, text="", bg="#1f4e78", fg="#dbe7f3")
         self.h2.pack(anchor="w")
-        self.body = ttk.Frame(self)
-        self.body.pack(fill="both", expand=True)
-        foot = ttk.Frame(self, padding=(16, 10))
+        # The button bar is packed before the page body so it always keeps its space
+        foot = ttk.Frame(self, padding=(self.px(16), self.px(10)))
         foot.pack(fill="x", side="bottom")
+        ttk.Separator(self).pack(fill="x", side="bottom")
+        self.body = ttk.Frame(self)
         ttk.Label(foot, text=f"v{__version__}", foreground="#888").pack(side="left")
         self.cancel_btn = ttk.Button(foot, text="Cancel", command=self.destroy)
         self.cancel_btn.pack(side="right")
         self.next_btn = ttk.Button(foot, text="Next >", command=self.next)
-        self.next_btn.pack(side="right", padx=(0, 8))
+        self.next_btn.pack(side="right", padx=(0, self.px(8)))
         self.back_btn = ttk.Button(foot, text="< Back", command=self.back)
-        self.back_btn.pack(side="right", padx=(0, 4))
+        self.back_btn.pack(side="right", padx=(0, self.px(4)))
+        self.body.pack(fill="both", expand=True)
 
         self.pages = [cls(self) for cls in self.PAGES]
+        self._fit_window()
         self.i = 0
         self.show(0)
+
+    def px(self, n: float) -> int:
+        """Design pixels (at 100 % display scaling) -> pixels on this screen."""
+        return round(n * self.factor)
+
+    def _fit_window(self) -> None:
+        """Size the window for the tallest page, with its longest dynamic texts, so every
+        page fits at any display scaling. Capped to the screen; stays resizable."""
+        env_page = next(p for p in self.pages if isinstance(p, Environment))
+        done_page = next(p for p in self.pages if isinstance(p, Done))
+        conn_page = next(p for p in self.pages if isinstance(p, Connect))
+        env_page.warning.config(text="X " * 90)
+        done_page.summary.config(text="\n".join(["Environment: X"] * 4) + "\n\n" + "X " * 120)
+        conn_page.result.config(text="X " * 100)
+        conn_page.retry.pack(anchor="w")
+        need_w = need_h = 0
+        for p in self.pages:
+            p.pack(fill="both", expand=True)
+            self.update_idletasks()
+            need_w = max(need_w, self.winfo_reqwidth())
+            need_h = max(need_h, self.winfo_reqheight())
+            p.pack_forget()
+        env_page.warning.config(text="")
+        done_page.summary.config(text="")
+        conn_page.result.config(text="")
+        conn_page.retry.pack_forget()
+        w = min(max(need_w, self.px(640)), self.winfo_screenwidth() - 40)
+        h = min(need_h + self.px(16), self.winfo_screenheight() - 80)
+        self.geometry(f"{w}x{h}")
+        self.minsize(min(w, self.px(560)), min(h, self.px(420)))
 
     def selected_env(self) -> Env:
         return Env(self.env.get())

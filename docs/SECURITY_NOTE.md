@@ -141,11 +141,11 @@ Current state: **minimum versions only, no lockfile, no hash pinning.** The tool
 | # | Item | Owner | Status |
 |---|---|---|---|
 | 1 | Validation on **DEMO** with a real certificate / token (delivery step 7) | IT + tax | not started; needs credentials |
-| 2 | **Windows Excel 365** run of the buttons and the installer / assistant (`build_xlsm.ps1`, VBA Windows branch, GUI). CI covers silent install, helper, credential store, registry and uninstall. | owner (Windows PC) | in progress |
+| 2 | **Windows Excel 365**: verified by the owner on a Windows 11 PC on 2026-10-25 for the installer, the setup assistant, the Trusted Location (no macro prompt), auto-configuration, self-test 42/42 and the offline buttons with sample data (Detect, Check, Match). CI covers silent install, helper, credential store, registry and uninstall. Still open: the **KSeF buttons** (Decode / Generate / Lookup / Query) on Windows, which need TEST invoices for the test company (planned Part B). | owner (Windows PC) | mostly done |
 | 3 | Generate an IZ with **500 invoices** on TEST (acceptance criterion) | dev | **done** 2026-10-24 (see HANDOVER.md) |
 | 4 | Policy: macro-enabled workbook allowed? AppleScript launcher (Mac) / `WScript.Shell` + ASR rules (Windows)? Code-sign the VBA project? | security | open (Q5) |
 | 5 | Production auth route: KSeF token vs XAdES certificate (Q4); who generates and rotates tokens; revocation procedure (`DELETE /tokens/{ref}`; no CLI command yet) | security | open |
-| 6 | Dependency pinning (lockfile with hashes) and **code signing** of installer and executables (company certificate; removes the SmartScreen warning) | dev + security | packaging done (installer); pinning and signing open |
+| 6 | Dependency pinning (lockfile with hashes) and **code signing** of installer and executables. **Release blocker:** Windows 11 Smart App Control blocked a rebuilt unsigned installer outright, with no "run anyway". Recommended: Certum code signing (SimplySign cloud key) in the company name, or Azure Trusted Signing. | dev + owner | packaging done; signing and pinning open |
 | 7 | Retention and access rules for the audit log, the workbook copies and the `Log` sheet (GDPR for sole-trader data) | compliance | open |
 | 8 | Behaviour and procedure when KSeF is unavailable (fallback to individual KSeF numbers) | finance ops | documented in the user guide; confirm (Q7) |
 | 9 | System of record for generated IZ (Q6) | finance + tax | open |

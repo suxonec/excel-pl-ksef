@@ -19,7 +19,7 @@ Proof-of-concept status as of 2026-10-24. Everything below was verified on the K
 | 3 | TEST setup, token with `CollectiveIdentifierManage` | done (`ksefiz testenv-setup`, `auth-test`) |
 | 4 | TEST invoices (FA(3)) so real KSeF numbers exist | done (helper script: 6 invoices via online session, 500 via one batch session; 2 test companies) |
 | 5 | M5 generate, M3 decode, M6 lookup, M7 query, paging, rate limiting, audit | done, end to end on TEST |
-| 6 | Excel buttons wired to the helper, progress, cancel, errors | done; tested by the user on Excel for Mac |
+| 6 | Excel buttons wired to the helper, progress, cancel, errors | done; tested on Excel for Mac, and offline buttons on Windows. Plus a Windows installer, setup assistant and sample data (ADR-013, ADR-014). |
 | 7 | DEMO validation | **not started**: needs a real certificate/token and approval |
 | 8 | Hand-over pack | this document set |
 
@@ -33,7 +33,7 @@ Proof-of-concept status as of 2026-10-24. Everything below was verified on the K
 | Decode 50 IZ on TEST within rate limits, paging handled, every row logged | **met**: 50 IZ / 100 rows with forced paging in ~10 s. Every API call is in the audit log; the result rows go to the output sheet/CSV. | `KSEFIZ_E2E_HEAVY=1 pytest -m e2e` |
 | Reverse lookup returns all IZ containing an invoice used in several IZ | **met**: 3 IZ for one invoice, including a buyer-created IZ | e2e, run logs |
 | No secret in workbook, logs, CSV output or git history | **met**: scanned all repo files, logs, state files and the pushed commit for both live TEST tokens | scan before commit `06a68c8` |
-| Runs on Windows with Excel 365; CLI also on macOS | **partly**: CLI on macOS ✔; Python on Windows ✔ (CI); Excel for Mac ✔; **Excel 365 on Windows not yet run** | CI run on GitHub |
+| Runs on Windows with Excel 365; CLI also on macOS | **mostly**: CLI on macOS ✔; Python on Windows ✔ (CI); Excel for Mac ✔; **Windows 11 + Excel 365** ✔ for installer, setup assistant, Trusted Location, self-test and offline buttons. The KSeF buttons are not yet run on Windows (they need TEST invoices for the new test company). | owner test 2026-10-25, CI |
 
 ## Answers found during the build
 
@@ -47,6 +47,9 @@ Also learned:
 - The date in a KSeF number is the KSeF acceptance date, not the invoice date.
 
 ## Still open
+
+- **Code signing (release blocker):** Smart App Control blocks unsigned builds on Windows 11.
+- **KSeF buttons on Windows:** Part B (the assistant creates TEST invoices for the new test company).
 
 See SECURITY_NOTE.md section 9 for owners. In short:
 - DEMO validation

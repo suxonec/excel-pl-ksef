@@ -5,7 +5,8 @@
 - every excel/vba/*.bas module must be present with identical code,
 - the workbook document module (ThisWorkbook; localised names such as "Ten_skoroszyt"
   are recognised by type) must equal excel/vba/ThisWorkbook.vba,
-- sheet modules and any other module must be empty (at most `Option Explicit`).
+- sheet modules and any other module must be empty (at most `Option Explicit`),
+- no user or machine details in the file metadata (run scripts/sanitize_xlsm.py first).
 
 Comparison ignores `Attribute` lines, trailing spaces, line endings and leading/trailing
 blank lines. Identifier case differences are reported but accepted, because the VBA editor
@@ -17,9 +18,13 @@ from __future__ import annotations
 import difflib
 import re
 import sys
+import zipfile
 from pathlib import Path
 
 from oletools.olevba import VBA_Parser
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from sanitize_xlsm import personal_details  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 WORKBOOK_CLASS = "00020819"  # VB_Base of the workbook document module
@@ -81,6 +86,10 @@ def main(path: Path) -> int:
                 problems.append(f"{what} {name} contains code (must be empty)")
     finally:
         parser.close()
+
+    with zipfile.ZipFile(path) as z:
+        for detail in personal_details({n: z.read(n) for n in z.namelist()}):
+            problems.append(f"personal/machine detail: {detail} - run scripts/sanitize_xlsm.py")
 
     for name in sorted(set(expected) - seen):
         problems.append(f"module {name} is missing from the workbook")

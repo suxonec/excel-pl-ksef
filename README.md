@@ -37,7 +37,8 @@ How it's built:
 - `packaging/windows/ksefiz.spec` (PyInstaller) builds `ksefiz.exe` plus the windowed `KSeF IZ Setup.exe`.
 - `packaging/windows/ksefiz.iss` (Inno Setup) builds the installer.
 - The bundled workbook is `excel/dist/KSeF_IZ_Tool.xlsm`, built once per VBA change on a Windows PC with Excel: `powershell -ExecutionPolicy Bypass -File scripts\build_xlsm.ps1`.
-- CI checks with `scripts/verify_xlsm_vba.py` that the workbook contains exactly the code in `excel/vba/`.
+- Before committing it, run `scripts/sanitize_xlsm.py` on it. Excel stores the user name and the save folder in every saved file.
+- CI checks with `scripts/verify_xlsm_vba.py` that the workbook contains exactly the code in `excel/vba/` and no user or machine details.
 
 Support commands: `ksefiz doctor` (what this PC is set up with, no secrets), `ksefiz token-set --env <env> --nip <NIP>` (store a token, hidden input), `ksefiz setup` (the assistant).
 

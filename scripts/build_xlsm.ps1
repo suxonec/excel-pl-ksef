@@ -5,7 +5,9 @@
 #
 # Needs Excel 365 and "Trust access to the VBA project object model"
 # (File > Options > Trust Center > Trust Center Settings > Macro Settings) while building.
-# Afterwards: python scripts\verify_xlsm_vba.py excel\dist\KSeF_IZ_Tool.xlsm
+# Afterwards (on any machine with Python), before committing the file:
+#   python scripts/sanitize_xlsm.py excel/dist/KSeF_IZ_Tool.xlsm    # Excel writes the user name
+#   python scripts/verify_xlsm_vba.py excel/dist/KSeF_IZ_Tool.xlsm  # and save path on every save
 param(
     [string]$Template = "excel\KSeF_IZ_Tool_template.xlsx",
     [string]$Out = "excel\dist\KSeF_IZ_Tool.xlsm"

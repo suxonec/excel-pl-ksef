@@ -135,6 +135,9 @@ date segment is the KSeF acceptance date (Polish time), not `P_1`.
 - **Release workbook:** `excel/dist/KSeF_IZ_Tool.xlsm` is committed (exception in `.gitignore`), built by
   `build_xlsm.ps1` on Windows with Excel, which injects `excel/vba/ThisWorkbook.vba`. GitHub runners have no Excel.
   CI proves with oletools that the binary's VBA equals the text sources, so the opaque file can't hide code.
+  Excel writes the saving user's name (`lastModifiedBy`) and the save folder (`x15ac:absPath`, which contains the
+  Windows user name) on every save. `scripts/sanitize_xlsm.py` strips them by rewriting only those XML parts,
+  and the verifier fails while they are present.
 - **Token entry:** `ksefiz token-set` and the assistant store a token only after a successful test login.
 - **Upgrades:** an existing workbook is renamed to a dated backup, never overwritten. The uninstaller never deletes workbooks.
 - **TLS:** the OS trust store via `truststore`, so the tool works behind company TLS inspection.

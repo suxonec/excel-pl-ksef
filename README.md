@@ -81,7 +81,7 @@ On macOS, keep the venv outside a synced `Documents` folder. macOS can mark the 
 1. Build a workbook with `.venv/bin/python scripts/build_workbook.py`, choosing one of three flavours:
    - no flag: `excel/KSeF_IZ_Tool_template.xlsx`, empty sheets (committed);
    - `--demo`: `excel/KSeF_IZ_Tool_demo.xlsx`, prefilled with synthetic statements, decoded rows and open items, with nothing machine-specific (committed);
-   - `--local`: `output/KSeF_IZ_Tool_local.xlsx`, the demo plus this machine's `helper_path` and the KSeF TEST invoices from `~/.ksefiz/test/invoices.csv`. It's for your own testing and is **never committed** (`output/` is git-ignored).
+   - `--local`: `output/KSeF_IZ_Tool_local.xlsx`, the demo plus this machine's `helper_path` and the KSeF TEST invoices from `~/.ksefiz/test/invoices.csv`. It also writes **`output/KSeF_IZ_Tool_local.xlsm`**: the same data in a copy of the release workbook, with all macros, ready to use without importing VBA. It's for your own testing and is **never committed** (`output/` is git-ignored).
 2. Open it in Excel. Open the VBA editor (Alt+F11, or Tools > Macro > Visual Basic Editor on Mac). Use File > Import File for every `excel/vba/*.bas` (`modIZ`, `modDetect`, `modMatch`, `modSelfTest`, `modSetup`, `modHelper`, `modApi`).
 3. Run the macro `SetupWorkbook`. It adds the buttons.
 4. Save as **Excel Macro-Enabled Workbook** (`excel/KSeF_IZ_Tool.xlsm`). The `.xlsm` is git-ignored.

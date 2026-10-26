@@ -7,6 +7,8 @@
     python scripts/build_workbook.py --local   -> output/KSeF_IZ_Tool_local.xlsx     (git-ignored)
         + this machine's helper_path and the KSeF TEST invoices from
         ~/.ksefiz/test/invoices.csv in 4_Generate / 5_Lookup - for your own testing only
+        and, from the release workbook excel/dist/KSeF_IZ_Tool.xlsm (macros included):
+                                               -> output/KSeF_IZ_Tool_local.xlsm     (git-ignored)
 
 Then import excel/vba/*.bas in Excel, run SetupWorkbook and save as .xlsm (see README).
 Sheet layouts must match the column constants in excel/vba/*.bas.
@@ -88,11 +90,7 @@ def build(demo: bool, local: bool = False) -> Workbook:
     readme.title = "README"
     readme["A1"] = '="KSeF IZ Tool  |  ENVIRONMENT: "&Config!B2'
     readme["A1"].font = Font(bold=True, size=16)
-    for env, color in (("PROD", "C00000"), ("DEMO", "ED7D31"), ("TEST", "70AD47")):
-        readme.conditional_formatting.add(
-            "A1:H1", FormulaRule(formula=[f'Config!$B$2="{env}"'],
-                                 fill=PatternFill("solid", bgColor=color),
-                                 font=Font(color="FFFFFF", bold=True)))
+    _env_banner(readme)
     lines = [
         (2, "New here? Click 'Load sample data' (right of the buttons below) to fill the "
             "sheets with synthetic examples, then try Detect IDs, Check (no API) and Match."),
@@ -219,17 +217,52 @@ def build(demo: bool, local: bool = False) -> Workbook:
 
     _sample_sheet(wb)
 
+    _fill(wb, demo, local)
+    return wb
+
+
+def _env_banner(readme: Worksheet) -> None:
+    """README row 1 coloured by Config environment: TEST green, DEMO amber, PROD red."""
+    for env, color in (("PROD", "C00000"), ("DEMO", "ED7D31"), ("TEST", "70AD47")):
+        readme.conditional_formatting.add(
+            "A1:H1", FormulaRule(formula=[f'Config!$B$2="{env}"'],
+                                 fill=PatternFill("solid", bgColor=color),
+                                 font=Font(color="FFFFFF", bold=True)))
+
+
+def _fill(wb: Workbook, demo: bool, local: bool) -> None:
+    """Example data into a workbook built here or loaded from the release .xlsm."""
     if demo or local:
         ds = synthetic.generate()
-        _rows(det, 1, synthetic.STATEMENT_FIELDS, ds.statements)
-        _rows(dec, 3, synthetic.DECODED_FIELDS, ds.decoded)
-        _rows(mat, 1, synthetic.OPEN_ITEM_FIELDS, ds.open_items)
+        _rows(wb["1_Detect"], 1, synthetic.STATEMENT_FIELDS, ds.statements)
+        _rows(wb["2_Decode"], 3, synthetic.DECODED_FIELDS, ds.decoded)
+        _rows(wb["3_Match"], 1, synthetic.OPEN_ITEM_FIELDS, ds.open_items)
     if local:  # machine-specific: never commit (output/ is git-ignored)
         helper = ROOT / ".venv" / ("Scripts/ksefiz.exe" if os.name == "nt" else "bin/ksefiz")
         if helper.exists():
-            cfg["B5"] = str(helper)
-        _local_test_invoices(gen, lk, q)
-    return wb
+            cfg = wb["Config"]
+            for row in cfg.iter_rows(min_row=2, max_col=2):
+                if row[0].value == "helper_path":
+                    row[1].value = str(helper)
+        _local_test_invoices(wb["4_Generate"], wb["5_Lookup"], wb["6_Query"])
+
+
+def build_local_xlsm(out: Path) -> Path | None:
+    """Personal, macro-enabled test copy: the release workbook (all VBA) + local data.
+    openpyxl keeps the VBA project but not the form-control buttons; the workbook re-creates
+    them on open (modSetup.AutoConfigure)."""
+    src = ROOT / "excel" / "dist" / "KSeF_IZ_Tool.xlsm"
+    if not src.exists():
+        return None
+    from openpyxl import load_workbook
+
+    wb = load_workbook(src, keep_vba=True)
+    _env_banner(wb["README"])  # Excel saved it as an extension openpyxl drops on load
+    _fill(wb, demo=True, local=True)
+    wb.properties.creator = wb.properties.lastModifiedBy = "ksefiz"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    wb.save(out)
+    return out
 
 
 # Hidden _Sample sheet: synthetic data that the "Load sample data" button (modSample.bas)
@@ -297,6 +330,9 @@ def main() -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
     build(args.demo, args.local).save(out)
     print(f"wrote {out}")
+    if args.local and not args.out:
+        xlsm = build_local_xlsm(ROOT / "output" / "KSeF_IZ_Tool_local.xlsm")
+        print(f"wrote {xlsm}" if xlsm else "skipped .xlsm: excel/dist/KSeF_IZ_Tool.xlsm missing")
 
 
 if __name__ == "__main__":

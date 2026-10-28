@@ -1,0 +1,45 @@
+{
+  "scenario": "Generate an IZ for 2 invoices of one seller, without payment details.",
+  "source": "open-api.json + verified live on TEST 2026-10-24 (docs/api-notes.md)",
+  "notes": [
+    "payment and description are optional per invoice."
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details"
+    },
+    "body": {
+      "invoices": [
+        {
+          "ksefNumber": "3023936130-20261015-95E3B5D45D27-F0"
+        },
+        {
+          "ksefNumber": "3023936130-20261015-18B2EE11E992-5E"
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "collectiveIdentifierNumber": "3023936130-IZ202610-C83E538499D9-E6"
+    }
+  },
+  "excel_rows": [
+    {
+      "group_key": "3023936130",
+      "iz": "3023936130-IZ202610-C83E538499D9-E6",
+      "invoice_count": "2",
+      "status": "OK",
+      "error_code": ""
+    }
+  ]
+}

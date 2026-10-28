@@ -1,0 +1,59 @@
+{
+  "scenario": "Invoices from two sellers in one request.",
+  "source": "open-api.json + verified live on TEST 2026-10-24 (docs/api-notes.md)",
+  "notes": [
+    "The tool's prevalidate() catches this offline and never sends it (status 'rejected before API: mixed sellers ... (KSeF error 71004)')."
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details"
+    },
+    "body": {
+      "invoices": [
+        {
+          "ksefNumber": "3023936130-20261015-95E3B5D45D27-F0"
+        },
+        {
+          "ksefNumber": "1766801637-20261016-C02AA2F6AA9E-56"
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "application/problem+json"
+    },
+    "body": {
+      "title": "Bad Request",
+      "status": 400,
+      "instance": "/collective-identifiers",
+      "detail": "Żądanie jest nieprawidłowe.",
+      "errors": [
+        {
+          "code": 71004,
+          "description": "Faktury mają różnych sprzedawców.",
+          "details": [
+            "Faktura o numerze KSeF 1766801637-20261016-C02AA2F6AA9E-56 ma innego sprzedawcę."
+          ]
+        }
+      ],
+      "timestamp": "2026-10-27T09:15:02.1234567+00:00",
+      "traceId": "83ff7fe3e1f0859de02071366047b633"
+    }
+  },
+  "excel_rows": [
+    {
+      "group_key": "MIX",
+      "iz": "",
+      "invoice_count": "2",
+      "status": "API error: Żądanie jest nieprawidłowe. | Faktury mają różnych sprzedawców.; Faktura o numerze KSeF 1766801637-20261016-C02AA2F6AA9E-56 ma innego sprzedawcę.",
+      "error_code": "71004"
+    }
+  ]
+}

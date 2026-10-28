@@ -1,0 +1,39 @@
+{
+  "scenario": "Read the effective rate limits (response shortened to the groups the tool uses).",
+  "source": "open-api.json + verified live on TEST 2026-10-24 (docs/api-notes.md)",
+  "notes": [
+    "The real response lists every group. One collectiveIdentifier budget covers generate, decode, lookup and query together."
+  ],
+  "request": {
+    "method": "GET",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/rate-limits",
+    "headers": {
+      "Accept": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "collectiveIdentifier": {
+        "perSecond": 20,
+        "perMinute": 120,
+        "perHour": 240
+      },
+      "other": {
+        "perSecond": 10,
+        "perMinute": 30,
+        "perHour": 120
+      },
+      "anonymous": {
+        "perSecond": 60,
+        "perMinute": -1,
+        "perHour": -1
+      }
+    }
+  }
+}

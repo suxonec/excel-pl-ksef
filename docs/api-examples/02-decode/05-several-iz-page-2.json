@@ -1,0 +1,44 @@
+{
+  "scenario": "Same request again with the continuation token: next page.",
+  "source": "open-api.json + verified live on TEST 2026-10-24 (docs/api-notes.md)",
+  "notes": [
+    "The body must be the same as for page 1. The token goes in the x-continuation-token header."
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers/invoices",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details",
+      "x-continuation-token": "eyJEYXRlQ3JlYXRlZCI6IjIwMjYtMTAtMjdUMDk6MTI6MzEuNDQwMDAwKzAwOjAwIn0"
+    },
+    "query": {
+      "pageSize": 10
+    },
+    "body": {
+      "collectiveIdentifierNumbers": [
+        "3023936130-IZ202610-C83E538499D9-E6",
+        "3023936130-IZ202610-5A87E99ED6AE-57",
+        "1766801637-IZ202610-3E6009906D54-86"
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "continuationToken": null,
+      "invoices": [
+        {
+          "ksefNumber": "3023936130-20261015-95E3B5D45D27-F0",
+          "collectiveIdentifierNumber": "3023936130-IZ202610-C83E538499D9-E6",
+          "detailsHidden": false
+        }
+      ]
+    }
+  }
+}

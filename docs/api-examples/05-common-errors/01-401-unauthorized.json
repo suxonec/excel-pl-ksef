@@ -1,0 +1,41 @@
+{
+  "scenario": "Missing or expired access token (any IZ endpoint).",
+  "source": "open-api.json (CIRFMF/ksef-api, API 2.9.0), checked 2026-10-27",
+  "notes": [
+    "The tool refreshes the token before each call, so this should not happen in a run."
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <expired accessToken>",
+      "X-Error-Format": "problem-details"
+    },
+    "body": {
+      "invoices": [
+        {
+          "ksefNumber": "3023936130-20261015-95E3B5D45D27-F0"
+        },
+        {
+          "ksefNumber": "3023936130-20261015-18B2EE11E992-5E"
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 401,
+    "headers": {
+      "Content-Type": "application/problem+json"
+    },
+    "body": {
+      "title": "Unauthorized",
+      "status": 401,
+      "detail": "Wymagane jest uwierzytelnienie.",
+      "instance": "/collective-identifiers",
+      "traceId": "a27d336dc4fc4feaafa98c2177f38f49",
+      "timestamp": "2026-10-27T09:15:02.1234567+00:00"
+    }
+  }
+}

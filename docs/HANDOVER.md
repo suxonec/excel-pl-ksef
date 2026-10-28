@@ -8,6 +8,7 @@ Proof-of-concept status as of 2026-10-24. Everything below was verified on the K
 | [SECURITY_NOTE.md](SECURITY_NOTE.md) | security review, tax/compliance review |
 | [decisions.md](decisions.md) | design decisions (ADR-001 … ADR-011), open questions |
 | [api-notes.md](api-notes.md) | KSeF API behaviour, verified live |
+| [api-examples/](api-examples/README.md) | request/response examples for every IZ call, runnable `.http` file |
 | [BRIEF.md](BRIEF.md) | original build brief |
 
 ## Delivery plan status (brief section 8)

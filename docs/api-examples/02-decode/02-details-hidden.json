@@ -1,0 +1,87 @@
+{
+  "scenario": "Decode as a party with no role on the invoices: details hidden.",
+  "source": "open-api.json (CIRFMF/ksef-api, API 2.9.0), checked 2026-10-27",
+  "notes": [
+    "payment and description are only returned to the IZ creator or a party on the invoice. On TEST, both seller and buyer see them (docs/api-notes.md)."
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers/invoices",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details"
+    },
+    "query": {
+      "pageSize": 500
+    },
+    "body": {
+      "collectiveIdentifierNumbers": [
+        "3023936130-IZ202610-5A87E99ED6AE-57"
+      ]
+    },
+    "context_nip": "4414286595"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "continuationToken": null,
+      "invoices": [
+        {
+          "ksefNumber": "3023936130-20261015-9178625E5555-54",
+          "collectiveIdentifierNumber": "3023936130-IZ202610-5A87E99ED6AE-57",
+          "detailsHidden": true
+        },
+        {
+          "ksefNumber": "3023936130-20261015-18B2EE11E992-5E",
+          "collectiveIdentifierNumber": "3023936130-IZ202610-5A87E99ED6AE-57",
+          "detailsHidden": true
+        },
+        {
+          "ksefNumber": "3023936130-20261015-95E3B5D45D27-F0",
+          "collectiveIdentifierNumber": "3023936130-IZ202610-5A87E99ED6AE-57",
+          "detailsHidden": true
+        }
+      ]
+    }
+  },
+  "excel_rows": [
+    {
+      "iz": "3023936130-IZ202610-5A87E99ED6AE-57",
+      "ksef_number": "3023936130-20261015-9178625E5555-54",
+      "amount": "",
+      "currency": "",
+      "description": "",
+      "details_hidden": "true",
+      "status": "OK",
+      "error_code": "",
+      "timestamp": "2026-10-27T09:15:02+00:00"
+    },
+    {
+      "iz": "3023936130-IZ202610-5A87E99ED6AE-57",
+      "ksef_number": "3023936130-20261015-18B2EE11E992-5E",
+      "amount": "",
+      "currency": "",
+      "description": "",
+      "details_hidden": "true",
+      "status": "OK",
+      "error_code": "",
+      "timestamp": "2026-10-27T09:15:02+00:00"
+    },
+    {
+      "iz": "3023936130-IZ202610-5A87E99ED6AE-57",
+      "ksef_number": "3023936130-20261015-95E3B5D45D27-F0",
+      "amount": "",
+      "currency": "",
+      "description": "",
+      "details_hidden": "true",
+      "status": "OK",
+      "error_code": "",
+      "timestamp": "2026-10-27T09:15:02+00:00"
+    }
+  ]
+}

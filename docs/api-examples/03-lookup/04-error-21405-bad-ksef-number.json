@@ -1,0 +1,52 @@
+{
+  "scenario": "A path value that does not match the KsefNumber pattern.",
+  "source": "open-api.json (CIRFMF/ksef-api, API 2.9.0), checked 2026-10-27",
+  "notes": [
+    "The tool validates first and writes 'invalid KSeF number (format)' without calling the API."
+  ],
+  "request": {
+    "method": "GET",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers/ksef/ABC",
+    "headers": {
+      "Accept": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details"
+    },
+    "query": {
+      "pageSize": 200
+    }
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "application/problem+json"
+    },
+    "body": {
+      "title": "Bad Request",
+      "status": 400,
+      "instance": "/collective-identifiers/ksef/ABC",
+      "detail": "Żądanie jest nieprawidłowe.",
+      "errors": [
+        {
+          "code": 21405,
+          "description": "Błąd walidacji danych wejściowych.",
+          "details": [
+            "<message from the KSeF validator>"
+          ]
+        }
+      ],
+      "timestamp": "2026-10-27T09:15:02.1234567+00:00",
+      "traceId": "f23a8ffaf06345243060d10a946fe4ff"
+    }
+  },
+  "excel_rows": [
+    {
+      "ksef_number": "ABC",
+      "iz": "",
+      "created_in_current_context": "",
+      "date_created": "",
+      "status": "invalid KSeF number (format)",
+      "error_code": ""
+    }
+  ]
+}

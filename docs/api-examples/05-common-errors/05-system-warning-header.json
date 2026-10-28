@@ -1,0 +1,37 @@
+{
+  "scenario": "Success with a technical warning header (does not change the result).",
+  "source": "open-api.json (CIRFMF/ksef-api, API 2.9.0), checked 2026-10-27",
+  "notes": [
+    "Format: '[code]: message | [code]: message'. Send X-Test-System-Warning to get a test warning back. The codes here are made up."
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details"
+    },
+    "body": {
+      "invoices": [
+        {
+          "ksefNumber": "3023936130-20261015-95E3B5D45D27-F0"
+        },
+        {
+          "ksefNumber": "3023936130-20261015-18B2EE11E992-5E"
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json",
+      "X-System-Warning": "[W001]: Example warning text | [W002]: Second warning"
+    },
+    "body": {
+      "collectiveIdentifierNumber": "3023936130-IZ202610-C83E538499D9-E6"
+    }
+  }
+}

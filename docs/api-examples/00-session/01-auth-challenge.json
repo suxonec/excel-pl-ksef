@@ -1,0 +1,27 @@
+{
+  "scenario": "Start login: get a challenge (no auth header).",
+  "source": "open-api.json (CIRFMF/ksef-api, API 2.9.0), checked 2026-10-27",
+  "notes": [
+    "timestampMs is encrypted together with the KSeF token in the next step."
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/auth/challenge",
+    "headers": {
+      "Accept": "application/json",
+      "X-Error-Format": "problem-details"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "challenge": "20261027-CR-3F19E8A000-2B7C4D9E10-6A",
+      "timestamp": "2026-10-27T09:15:00.4410000+00:00",
+      "timestampMs": 1793092500441,
+      "clientIp": "203.0.113.10"
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "scenario": "Decode an IZ generated without payment details.",
+  "source": "open-api.json (CIRFMF/ksef-api, API 2.9.0), checked 2026-10-27",
+  "notes": [
+    "Empty fields with detailsHidden=false mean nothing was given, not that it is hidden."
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers/invoices",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details"
+    },
+    "query": {
+      "pageSize": 500
+    },
+    "body": {
+      "collectiveIdentifierNumbers": [
+        "3023936130-IZ202610-C83E538499D9-E6"
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "continuationToken": null,
+      "invoices": [
+        {
+          "ksefNumber": "3023936130-20261015-18B2EE11E992-5E",
+          "collectiveIdentifierNumber": "3023936130-IZ202610-C83E538499D9-E6",
+          "payment": null,
+          "description": null,
+          "detailsHidden": false
+        },
+        {
+          "ksefNumber": "3023936130-20261015-95E3B5D45D27-F0",
+          "collectiveIdentifierNumber": "3023936130-IZ202610-C83E538499D9-E6",
+          "payment": null,
+          "description": null,
+          "detailsHidden": false
+        }
+      ]
+    }
+  },
+  "excel_rows": [
+    {
+      "iz": "3023936130-IZ202610-C83E538499D9-E6",
+      "ksef_number": "3023936130-20261015-18B2EE11E992-5E",
+      "amount": "",
+      "currency": "",
+      "description": "",
+      "details_hidden": "false",
+      "status": "OK",
+      "error_code": "",
+      "timestamp": "2026-10-27T09:15:02+00:00"
+    },
+    {
+      "iz": "3023936130-IZ202610-C83E538499D9-E6",
+      "ksef_number": "3023936130-20261015-95E3B5D45D27-F0",
+      "amount": "",
+      "currency": "",
+      "description": "",
+      "details_hidden": "false",
+      "status": "OK",
+      "error_code": "",
+      "timestamp": "2026-10-27T09:15:02+00:00"
+    }
+  ]
+}

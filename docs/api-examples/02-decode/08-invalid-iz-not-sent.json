@@ -1,0 +1,22 @@
+{
+  "scenario": "An IZ with a wrong CRC: rejected offline, nothing is sent.",
+  "source": "src/ksefiz/operations.py decode()",
+  "notes": [
+    "Offline check() runs first: format, NIP pattern, date, CRC-8."
+  ],
+  "request": null,
+  "response": null,
+  "excel_rows": [
+    {
+      "iz": "3023936130-IZ202610-C83E538499D9-00",
+      "ksef_number": "",
+      "amount": "",
+      "currency": "",
+      "description": "",
+      "details_hidden": "",
+      "status": "invalid IZ (crc)",
+      "error_code": "",
+      "timestamp": "2026-10-27T09:15:02+00:00"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "scenario": "The buyer (AP) generates an IZ for invoices it received from one supplier.",
+  "source": "open-api.json + verified live on TEST 2026-10-24 (docs/api-notes.md)",
+  "notes": [
+    "Logged in as the buyer (6510134498). The IZ still starts with the seller NIP (3023936130)."
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details"
+    },
+    "body": {
+      "invoices": [
+        {
+          "ksefNumber": "3023936130-20261015-B49F989DA94A-C0"
+        },
+        {
+          "ksefNumber": "3023936130-20261015-A52DB80A40B6-40"
+        }
+      ]
+    },
+    "context_nip": "6510134498"
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "collectiveIdentifierNumber": "3023936130-IZ202610-A0876F4BE6E8-2C"
+    }
+  },
+  "excel_rows": [
+    {
+      "group_key": "3023936130",
+      "iz": "3023936130-IZ202610-A0876F4BE6E8-2C",
+      "invoice_count": "2",
+      "status": "OK",
+      "error_code": ""
+    }
+  ]
+}

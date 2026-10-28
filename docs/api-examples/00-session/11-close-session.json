@@ -1,0 +1,17 @@
+{
+  "scenario": "Revoke the session at the end of a run.",
+  "source": "open-api.json + verified live on TEST 2026-10-24 (docs/api-notes.md)",
+  "request": {
+    "method": "DELETE",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/auth/sessions/current",
+    "headers": {
+      "Accept": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details"
+    }
+  },
+  "response": {
+    "status": 204,
+    "headers": {}
+  }
+}

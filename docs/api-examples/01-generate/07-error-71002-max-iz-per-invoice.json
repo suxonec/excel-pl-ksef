@@ -1,0 +1,47 @@
+{
+  "scenario": "An invoice already sits in 132 IZ in this context.",
+  "source": "open-api.json (CIRFMF/ksef-api, API 2.9.0), checked 2026-10-27",
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details"
+    },
+    "body": {
+      "invoices": [
+        {
+          "ksefNumber": "3023936130-20261015-95E3B5D45D27-F0"
+        },
+        {
+          "ksefNumber": "3023936130-20261015-18B2EE11E992-5E"
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "application/problem+json"
+    },
+    "body": {
+      "title": "Bad Request",
+      "status": 400,
+      "instance": "/collective-identifiers",
+      "detail": "Żądanie jest nieprawidłowe.",
+      "errors": [
+        {
+          "code": 71002,
+          "description": "Faktura jest już przypisana do maksymalnej liczby Identyfikatorów Zbiorczych.",
+          "details": [
+            "Faktura o numerze KSeF 3023936130-20261015-95E3B5D45D27-F0 jest już przypisana do maksymalnej liczby Identyfikatorów Zbiorczych."
+          ]
+        }
+      ],
+      "timestamp": "2026-10-27T09:15:02.1234567+00:00",
+      "traceId": "9e6c6d9e859c2fbaa24590ab86a403fd"
+    }
+  }
+}

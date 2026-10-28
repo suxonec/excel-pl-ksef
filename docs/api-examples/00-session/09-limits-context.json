@@ -1,0 +1,37 @@
+{
+  "scenario": "Read the effective per-IZ invoice limit for this context.",
+  "source": "open-api.json + verified live on TEST 2026-10-24 (docs/api-notes.md)",
+  "notes": [
+    "Only collectiveIdentifier.maxInvoices is used (default 500, can be raised to 5,000)."
+  ],
+  "request": {
+    "method": "GET",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/limits/context",
+    "headers": {
+      "Accept": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "onlineSession": {
+        "maxInvoiceSizeInMB": 1,
+        "maxInvoiceWithAttachmentSizeInMB": 3,
+        "maxInvoices": 10000
+      },
+      "batchSession": {
+        "maxInvoiceSizeInMB": 1,
+        "maxInvoiceWithAttachmentSizeInMB": 3,
+        "maxInvoices": 10000
+      },
+      "collectiveIdentifier": {
+        "maxInvoices": 500
+      }
+    }
+  }
+}

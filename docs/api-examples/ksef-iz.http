@@ -1,0 +1,81 @@
+### KSeF 2.0 collective identifier (IZ) calls - TEST environment only.
+### Works with the VS Code "REST Client" extension and the JetBrains HTTP Client.
+### Paste an access token from `ksefiz auth-test --env test` into @accessToken. Never commit a real token.
+### Identifiers below are synthetic (see README.md). Replace them with KSeF numbers that exist on TEST.
+
+@baseUrl = https://api-test.ksef.mf.gov.pl/v2
+@accessToken = PASTE_ACCESS_TOKEN
+@continuationToken = PASTE_TOKEN_FROM_PREVIOUS_PAGE
+
+### Context limits: collectiveIdentifier.maxInvoices
+GET {{baseUrl}}/limits/context
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+X-Error-Format: problem-details
+
+### Rate limits: collectiveIdentifier group
+GET {{baseUrl}}/rate-limits
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+X-Error-Format: problem-details
+
+### M5 Generate: one IZ for 2..maxInvoices invoices of one seller (201)
+POST {{baseUrl}}/collective-identifiers
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+X-Error-Format: problem-details
+
+{
+  "invoices": [
+    {"ksefNumber": "3023936130-20261015-95E3B5D45D27-F0", "payment": {"amount": 1230.00, "currency": "PLN"}, "description": "FV/2026/10/0141"},
+    {"ksefNumber": "3023936130-20261015-18B2EE11E992-5E", "payment": {"amount": 455.25, "currency": "PLN"}, "description": "FV/2026/10/0142"}
+  ]
+}
+
+### M3 Decode: up to 10 IZ, pageSize 10..500 (200)
+POST {{baseUrl}}/collective-identifiers/invoices?pageSize=500
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+X-Error-Format: problem-details
+
+{
+  "collectiveIdentifierNumbers": ["3023936130-IZ202610-5A87E99ED6AE-57"]
+}
+
+### M3 Decode, next page: same body, token in the header
+POST {{baseUrl}}/collective-identifiers/invoices?pageSize=500
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+X-Error-Format: problem-details
+x-continuation-token: {{continuationToken}}
+
+{
+  "collectiveIdentifierNumbers": ["3023936130-IZ202610-5A87E99ED6AE-57"]
+}
+
+### M6 Reverse lookup: IZ that contain one KSeF number, pageSize 10..200 (200)
+GET {{baseUrl}}/collective-identifiers/ksef/3023936130-20261015-95E3B5D45D27-F0?pageSize=200
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+X-Error-Format: problem-details
+
+### M7 Period query: IZ created in the context, window at most 100 days (200)
+POST {{baseUrl}}/collective-identifiers/query?pageSize=200
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+X-Error-Format: problem-details
+
+{
+  "dateCreatedFrom": "2026-10-01T00:00:00.000+00:00",
+  "dateCreatedTo": "2026-10-31T23:59:59.999+00:00",
+  "createdInCurrentContext": true
+}
+
+### Close the session when done (204)
+DELETE {{baseUrl}}/auth/sessions/current
+Authorization: Bearer {{accessToken}}
+X-Error-Format: problem-details

@@ -1,0 +1,47 @@
+{
+  "scenario": "Schema validation: only 1 invoice (minimum is 2).",
+  "source": "open-api.json (CIRFMF/ksef-api, API 2.9.0), checked 2026-10-27",
+  "notes": [
+    "21405 also covers: more invoices than collectiveIdentifier.maxInvoices, description > 512, unknown currency, KSeF number not matching the pattern. prevalidate() catches these offline. The details text comes from the KSeF validator; the exact wording is not documented."
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details"
+    },
+    "body": {
+      "invoices": [
+        {
+          "ksefNumber": "3023936130-20261015-95E3B5D45D27-F0"
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "application/problem+json"
+    },
+    "body": {
+      "title": "Bad Request",
+      "status": 400,
+      "instance": "/collective-identifiers",
+      "detail": "Żądanie jest nieprawidłowe.",
+      "errors": [
+        {
+          "code": 21405,
+          "description": "Błąd walidacji danych wejściowych.",
+          "details": [
+            "<message from the KSeF validator>"
+          ]
+        }
+      ],
+      "timestamp": "2026-10-27T09:15:02.1234567+00:00",
+      "traceId": "792677bc063764fd3892543b0fdf7bc0"
+    }
+  }
+}

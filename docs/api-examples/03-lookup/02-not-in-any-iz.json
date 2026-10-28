@@ -1,0 +1,36 @@
+{
+  "scenario": "The invoice is not in any IZ.",
+  "source": "open-api.json + verified live on TEST 2026-10-24 (docs/api-notes.md)",
+  "request": {
+    "method": "GET",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers/ksef/3023936130-20261015-FD25627FD848-12",
+    "headers": {
+      "Accept": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details"
+    },
+    "query": {
+      "pageSize": 200
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "continuationToken": null,
+      "collectiveIdentifiers": []
+    }
+  },
+  "excel_rows": [
+    {
+      "ksef_number": "3023936130-20261015-FD25627FD848-12",
+      "iz": "",
+      "created_in_current_context": "",
+      "date_created": "",
+      "status": "not in any IZ",
+      "error_code": ""
+    }
+  ]
+}

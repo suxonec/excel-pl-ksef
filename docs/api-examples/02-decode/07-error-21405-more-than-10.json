@@ -1,0 +1,54 @@
+{
+  "scenario": "More than 10 IZ in one call, or pageSize outside 10..500.",
+  "source": "open-api.json (CIRFMF/ksef-api, API 2.9.0), checked 2026-10-27",
+  "notes": [
+    "The tool never sends more than 10 (DECODE_BATCH_SIZE)."
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers/invoices",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details"
+    },
+    "query": {
+      "pageSize": 500
+    },
+    "body": {
+      "collectiveIdentifierNumbers": [
+        "3023936130-IZ202610-C83E538499D9-E6",
+        "3023936130-IZ202610-5A87E99ED6AE-57",
+        "3023936130-IZ202610-A0876F4BE6E8-2C",
+        "3023936130-IZ202610-9AA849B4FA90-2B",
+        "1766801637-IZ202610-3E6009906D54-86",
+        "3023936130-IZ202609-24ADE931A56F-F6",
+        "<5 more IZ>"
+      ]
+    }
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "application/problem+json"
+    },
+    "body": {
+      "title": "Bad Request",
+      "status": 400,
+      "instance": "/collective-identifiers/invoices",
+      "detail": "Żądanie jest nieprawidłowe.",
+      "errors": [
+        {
+          "code": 21405,
+          "description": "Błąd walidacji danych wejściowych.",
+          "details": [
+            "<message from the KSeF validator>"
+          ]
+        }
+      ],
+      "timestamp": "2026-10-27T09:15:02.1234567+00:00",
+      "traceId": "4c673ab53e2154ad20b98c04b7d04b52"
+    }
+  }
+}

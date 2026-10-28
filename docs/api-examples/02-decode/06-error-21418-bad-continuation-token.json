@@ -1,0 +1,59 @@
+{
+  "scenario": "Paging with an invalid or expired continuation token.",
+  "source": "open-api.json (CIRFMF/ksef-api, API 2.9.0), checked 2026-10-27",
+  "notes": [
+    "The tool marks every IZ in the batch with error_code 21418."
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers/invoices",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details",
+      "x-continuation-token": "not-a-valid-token"
+    },
+    "query": {
+      "pageSize": 500
+    },
+    "body": {
+      "collectiveIdentifierNumbers": [
+        "3023936130-IZ202610-C83E538499D9-E6"
+      ]
+    }
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "application/problem+json"
+    },
+    "body": {
+      "title": "Bad Request",
+      "status": 400,
+      "instance": "/collective-identifiers/invoices",
+      "detail": "Żądanie jest nieprawidłowe.",
+      "errors": [
+        {
+          "code": 21418,
+          "description": "Przesłany token kontynuacji jest nieprawidłowy."
+        }
+      ],
+      "timestamp": "2026-10-27T09:15:02.1234567+00:00",
+      "traceId": "8b1e1bc8cd7cbf52219b5d8ff50bb9c4"
+    }
+  },
+  "excel_rows": [
+    {
+      "iz": "3023936130-IZ202610-C83E538499D9-E6",
+      "ksef_number": "",
+      "amount": "",
+      "currency": "",
+      "description": "",
+      "details_hidden": "",
+      "status": "API error: Żądanie jest nieprawidłowe. | Przesłany token kontynuacji jest nieprawidłowy.",
+      "error_code": "21418",
+      "timestamp": "2026-10-27T09:15:02+00:00"
+    }
+  ]
+}

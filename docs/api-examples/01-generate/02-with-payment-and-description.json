@@ -1,0 +1,63 @@
+{
+  "scenario": "Generate an IZ with amount, currency and description per invoice.",
+  "source": "open-api.json + verified live on TEST 2026-10-24 (docs/api-notes.md)",
+  "notes": [
+    "payment needs both amount and currency (ISO 4217). description is at most 512 characters."
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details"
+    },
+    "body": {
+      "invoices": [
+        {
+          "ksefNumber": "3023936130-20261015-95E3B5D45D27-F0",
+          "payment": {
+            "amount": 1230.0,
+            "currency": "PLN"
+          },
+          "description": "FV/2026/10/0141"
+        },
+        {
+          "ksefNumber": "3023936130-20261015-18B2EE11E992-5E",
+          "payment": {
+            "amount": 455.25,
+            "currency": "PLN"
+          },
+          "description": "FV/2026/10/0142"
+        },
+        {
+          "ksefNumber": "3023936130-20261015-9178625E5555-54",
+          "payment": {
+            "amount": 89.9,
+            "currency": "EUR"
+          },
+          "description": "FV/2026/10/0150"
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "collectiveIdentifierNumber": "3023936130-IZ202610-5A87E99ED6AE-57"
+    }
+  },
+  "excel_rows": [
+    {
+      "group_key": "3023936130",
+      "iz": "3023936130-IZ202610-5A87E99ED6AE-57",
+      "invoice_count": "3",
+      "status": "OK",
+      "error_code": ""
+    }
+  ]
+}

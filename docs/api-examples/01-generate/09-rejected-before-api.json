@@ -1,0 +1,18 @@
+{
+  "scenario": "Group fails offline pre-validation: nothing is sent.",
+  "source": "src/ksefiz/operations.py prevalidate()",
+  "notes": [
+    "prevalidate() runs every check the API would fail on, so the request is never sent and the rate-limit budget is not used."
+  ],
+  "request": null,
+  "response": null,
+  "excel_rows": [
+    {
+      "group_key": "ONE",
+      "iz": "",
+      "invoice_count": "1",
+      "status": "rejected before API: 1 invoice(s); an IZ needs at least 2",
+      "error_code": ""
+    }
+  ]
+}

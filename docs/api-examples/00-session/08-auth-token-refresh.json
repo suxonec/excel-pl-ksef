@@ -1,0 +1,25 @@
+{
+  "scenario": "Refresh the access token (the tool does this when < 60 s are left).",
+  "source": "open-api.json + verified live on TEST 2026-10-24 (docs/api-notes.md)",
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/auth/token/refresh",
+    "headers": {
+      "Accept": "application/json",
+      "Authorization": "Bearer <refreshToken>",
+      "X-Error-Format": "problem-details"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "accessToken": {
+        "token": "<accessToken>",
+        "validUntil": "2026-10-27T09:45:20+00:00"
+      }
+    }
+  }
+}

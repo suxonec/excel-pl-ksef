@@ -1,0 +1,52 @@
+{
+  "scenario": "The token has none of InvoiceRead, InvoiceWrite, CollectiveIdentifierManage.",
+  "source": "open-api.json (CIRFMF/ksef-api, API 2.9.0), checked 2026-10-27",
+  "notes": [
+    "Other reasonCode values: ip-not-allowed, insufficient-resource-access, auth-method-not-allowed."
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details"
+    },
+    "body": {
+      "invoices": [
+        {
+          "ksefNumber": "3023936130-20261015-95E3B5D45D27-F0"
+        },
+        {
+          "ksefNumber": "3023936130-20261015-18B2EE11E992-5E"
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 403,
+    "headers": {
+      "Content-Type": "application/problem+json"
+    },
+    "body": {
+      "title": "Forbidden",
+      "status": 403,
+      "detail": "Brak wymaganych uprawnień do wykonania operacji w bieżącym kontekście.",
+      "instance": "/collective-identifiers",
+      "reasonCode": "missing-permissions",
+      "security": {
+        "requiredAnyOfPermissions": [
+          "InvoiceRead",
+          "InvoiceWrite",
+          "CollectiveIdentifierManage"
+        ],
+        "presentPermissions": [
+          "CredentialsRead"
+        ]
+      },
+      "traceId": "9874971fdca0574d15a7db7df35032d8",
+      "timestamp": "2026-10-27T09:15:02.1234567+00:00"
+    }
+  }
+}

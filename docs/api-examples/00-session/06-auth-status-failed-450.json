@@ -1,0 +1,38 @@
+{
+  "scenario": "Poll the login status: bad token (code 450). The tool stops and shows the details.",
+  "source": "open-api.json + verified live on TEST 2026-10-24 (docs/api-notes.md)",
+  "notes": [
+    "Other final codes: 415 no permissions in this context, 425 authentication revoked."
+  ],
+  "request": {
+    "method": "GET",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/auth/20261027-AU-3F1A2B4000-7C9D0E1F2A-5B",
+    "headers": {
+      "Accept": "application/json",
+      "Authorization": "Bearer <authenticationToken>",
+      "X-Error-Format": "problem-details"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "startDate": "2026-10-27T09:15:01+00:00",
+      "authenticationMethod": "Token",
+      "authenticationMethodInfo": {
+        "category": "Token",
+        "code": "token.ksef",
+        "displayName": "Token KSeF"
+      },
+      "status": {
+        "code": 450,
+        "description": "Uwierzytelnianie zakończone niepowodzeniem z powodu błędnego tokenu",
+        "details": [
+          "Nieprawidłowy token."
+        ]
+      }
+    }
+  }
+}

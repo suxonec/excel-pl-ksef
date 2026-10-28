@@ -1,0 +1,36 @@
+{
+  "scenario": "More IZ than pageSize: the next page is fetched with the continuation token.",
+  "source": "open-api.json + verified live on TEST 2026-10-24 (docs/api-notes.md)",
+  "notes": [
+    "An invoice can be in up to 132 IZ per context, so 2 pages of 200 are the realistic maximum."
+  ],
+  "request": {
+    "method": "GET",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers/ksef/3023936130-20261015-95E3B5D45D27-F0",
+    "headers": {
+      "Accept": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details",
+      "x-continuation-token": "eyJEYXRlQ3JlYXRlZCI6IjIwMjYtMTAtMjdUMDk6MTI6MzEuNDQwMDAwKzAwOjAwIn0"
+    },
+    "query": {
+      "pageSize": 200
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "continuationToken": null,
+      "collectiveIdentifiers": [
+        {
+          "collectiveIdentifierNumber": "3023936130-IZ202610-9AA849B4FA90-2B",
+          "createdInCurrentContext": true,
+          "dateCreated": "2026-10-01T08:00:00+00:00"
+        }
+      ]
+    }
+  }
+}

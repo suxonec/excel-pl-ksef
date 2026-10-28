@@ -1,0 +1,49 @@
+{
+  "scenario": "Decode up to 10 IZ in one call; first page.",
+  "source": "open-api.json + verified live on TEST 2026-10-24 (docs/api-notes.md)",
+  "notes": [
+    "The tool sends batches of 10 IZ with pageSize=500, so one page is normally enough. This example uses pageSize=10 to show paging."
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers/invoices",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <accessToken>",
+      "X-Error-Format": "problem-details"
+    },
+    "query": {
+      "pageSize": 10
+    },
+    "body": {
+      "collectiveIdentifierNumbers": [
+        "3023936130-IZ202610-C83E538499D9-E6",
+        "3023936130-IZ202610-5A87E99ED6AE-57",
+        "1766801637-IZ202610-3E6009906D54-86"
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "continuationToken": "eyJEYXRlQ3JlYXRlZCI6IjIwMjYtMTAtMjdUMDk6MTI6MzEuNDQwMDAwKzAwOjAwIn0",
+      "invoices": [
+        {
+          "ksefNumber": "1766801637-20261016-C02AA2F6AA9E-56",
+          "collectiveIdentifierNumber": "1766801637-IZ202610-3E6009906D54-86",
+          "payment": {
+            "amount": 300.0,
+            "currency": "PLN"
+          },
+          "description": null,
+          "detailsHidden": false
+        },
+        "... 9 more items ..."
+      ]
+    }
+  }
+}

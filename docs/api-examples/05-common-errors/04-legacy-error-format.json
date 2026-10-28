@@ -1,0 +1,50 @@
+{
+  "scenario": "Same 71004 error without the X-Error-Format header (legacy, deprecated shape).",
+  "source": "open-api.json (CIRFMF/ksef-api, API 2.9.0), checked 2026-10-27",
+  "notes": [
+    "The tool always sends X-Error-Format: problem-details, but client.parse_error() reads both shapes."
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/collective-identifiers",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <accessToken>"
+    },
+    "body": {
+      "invoices": [
+        {
+          "ksefNumber": "3023936130-20261015-95E3B5D45D27-F0"
+        },
+        {
+          "ksefNumber": "1766801637-20261016-C02AA2F6AA9E-56"
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "exception": {
+        "exceptionDetailList": [
+          {
+            "exceptionCode": 71004,
+            "exceptionDescription": "Faktury mają różnych sprzedawców.",
+            "details": [
+              "Faktura o numerze KSeF 1766801637-20261016-C02AA2F6AA9E-56 ma innego sprzedawcę."
+            ]
+          }
+        ],
+        "referenceNumber": "<referenceNumber>",
+        "serviceCode": "<serviceCode>",
+        "serviceCtx": "srvABCDA",
+        "serviceName": "Undefined",
+        "timestamp": "2026-10-27T09:15:02.1234567"
+      }
+    }
+  }
+}

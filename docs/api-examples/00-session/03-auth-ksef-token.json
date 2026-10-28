@@ -1,0 +1,38 @@
+{
+  "scenario": "Log in with the KSeF token for the NIP context.",
+  "source": "open-api.json + verified live on TEST 2026-10-24 (docs/api-notes.md)",
+  "notes": [
+    "The KSeF token itself is never sent in clear text and never logged."
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://api-test.ksef.mf.gov.pl/v2/auth/ksef-token",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "X-Error-Format": "problem-details"
+    },
+    "body": {
+      "challenge": "20261027-CR-3F19E8A000-2B7C4D9E10-6A",
+      "contextIdentifier": {
+        "type": "Nip",
+        "value": "3023936130"
+      },
+      "encryptedToken": "<base64 RSA-OAEP-SHA256( ksefToken + '|' + timestampMs )>",
+      "publicKeyId": "QIoAK/Yc3s27Z4t3SZY4Mhp8JNLH7Vl4N3lNlJAEig8="
+    }
+  },
+  "response": {
+    "status": 202,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "referenceNumber": "20261027-AU-3F1A2B4000-7C9D0E1F2A-5B",
+      "authenticationToken": {
+        "token": "<authenticationToken>",
+        "validUntil": "2026-10-27T09:45:00+00:00"
+      }
+    }
+  }
+}
